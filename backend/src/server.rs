@@ -4,8 +4,9 @@ use anyhow::{Context, Ok};
 use axum::Router;
 use sqlx::Postgres;
 use tokio::{net::TcpListener, signal};
-use tower_http::trace::TraceLayer;
-
+use tower_http::cors::CorsLayer;
+use axum::http::{HeaderValue,Method};
+use axum::http::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE};
 use crate::{
     auth,
     config::Config,
@@ -56,10 +57,21 @@ impl<C: Config + std::marker::Sync + 'static> Server<C, PgDatabase, RedisClient>
             self.redis.client(),
             &self.config,
         ));
+    let cors = CorsLayer::new()
+        .allow_origin("http://localhost:8080".parse::<axum::http::HeaderValue>().unwrap())
+        .allow_methods([
+            Method::GET,
+            Method::POST,
+            Method::PATCH,
+            Method::PUT,
+            Method::DELETE,
+        ])
+        .allow_credentials(true)
+        .allow_headers([AUTHORIZATION, ACCEPT, CONTENT_TYPE]);
         Router::new()
             .merge(auth::handler::router())
             .merge(expense::handler::router())
-            .layer(TraceLayer::new_for_http())
+            .layer(cors)
             .with_state(state)
     }
 
