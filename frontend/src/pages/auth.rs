@@ -65,46 +65,84 @@ pub fn login_component() -> Html {
 
     if *show_register {
         html! {
-            <div>
-                <RegisterComponent />
-                <button onclick={{
-                    let show_register = show_register.clone();
-                    Callback::from(move |_| show_register.set(false))
-                }}>{ "Retour à la connexion" }</button>
+            <div class="container mt-5">
+                <div class="row justify-content-center">
+                    <div class="col-md-6">
+                        <RegisterComponent />
+                        <div class="text-center mt-3">
+                            <button 
+                                class="btn btn-secondary"
+                                onclick={{
+                                    let show_register = show_register.clone();
+                                    Callback::from(move |_| show_register.set(false))
+                                }}
+                            >{ "Retour à la connexion" }</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         }
     } else {
         html! {
-            <div>
-                <h1>{ "Connexion" }</h1>
-                <form onsubmit={on_submit}>
-                    <input
-                        type="text"
-                        placeholder="Nom d'utilisateur"
-                        value={(*email).clone()}
-                        oninput={Callback::from(move |e: InputEvent| {
-                            let input: HtmlInputElement = e.target_unchecked_into();
-                            email.set(input.value());
-                        })}
-                    />
-                    <br />
-                    <input
-                        type="password"
-                        placeholder="Mot de passe"
-                        value={(*password).clone()}
-                        oninput={Callback::from(move |e: InputEvent| {
-                            let input: HtmlInputElement = e.target_unchecked_into();
-                            password.set(input.value());
-                        })}
-                    />
-                    <br />
-                    <button type="submit">{ "Se connecter" }</button>
-                </form>
-                <button onclick={{
-                    let show_register = show_register.clone();
-                    Callback::from(move |_| show_register.set(true))
-                }}>{ "S'inscrire" }</button>
-                <p>{ (*response_message).clone() }</p>
+            <div class="container mt-5">
+                <div class="row justify-content-center">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h1 class="card-title text-center mb-4">{ "Connexion" }</h1>
+                                <form onsubmit={on_submit}>
+                                    <div class="mb-3">
+                                        <input
+                                            type="email"
+                                            class="form-control"
+                                            placeholder="Email"
+                                            value={(*email).clone()}
+                                            oninput={Callback::from(move |e: InputEvent| {
+                                                let input: HtmlInputElement = e.target_unchecked_into();
+                                                email.set(input.value());
+                                            })}
+                                        />
+                                    </div>
+                                    <div class="mb-3">
+                                        <input
+                                            type="password"
+                                            class="form-control"
+                                            placeholder="Mot de passe"
+                                            value={(*password).clone()}
+                                            oninput={Callback::from(move |e: InputEvent| {
+                                                let input: HtmlInputElement = e.target_unchecked_into();
+                                                password.set(input.value());
+                                            })}
+                                        />
+                                    </div>
+                                    <div class="d-grid mb-3">
+                                        <button type="submit" class="btn btn-primary">{ "Se connecter" }</button>
+                                    </div>
+                                </form>
+                                <div class="d-grid">
+                                    <button 
+                                        class="btn btn-outline-secondary"
+                                        onclick={{
+                                            let show_register = show_register.clone();
+                                            Callback::from(move |_| show_register.set(true))
+                                        }}
+                                    >{ "S'inscrire" }</button>
+                                </div>
+                                {
+                                    if !(*response_message).is_empty() {
+                                        html! {
+                                            <div class="alert alert-info mt-3" role="alert">
+                                                { (*response_message).clone() }
+                                            </div>
+                                        }
+                                    } else {
+                                        html! {}
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         }
     }
@@ -178,49 +216,73 @@ pub fn register_component() -> Html {
     };
 
     html! {
-        <div>
-            <h1>{ "Inscription" }</h1>
-            <form onsubmit={on_submit}>
-                <input
-                    type="text"
-                    placeholder="Name"
-                    value={(*name).clone()}
-                    oninput={Callback::from(move |e: InputEvent| {
-                        let input: HtmlInputElement = e.target_unchecked_into();
-                        name.set(input.value());
-                    })}
-                />
-                <br />
-                <input
-                    type="text"
-                    placeholder="Email"
-                    value={(*email).clone()}
-                    oninput={Callback::from(move |e: InputEvent| {
-                        let input: HtmlInputElement = e.target_unchecked_into();
-                        email.set(input.value());
-                    })}
-                />
-                <br />
-                <input
-                    type="password"
-                    placeholder="Mot de passe"
-                    value={(*password).clone()}
-                    oninput={Callback::from(move |e: InputEvent| {
-                        let input: HtmlInputElement = e.target_unchecked_into();
-                        password.set(input.value());
-                    })}
-                />
-                <br />
-                <button type="submit">{ "S'inscrire" }</button>
-            </form>
-            <p>{ (*response_message).clone() }</p>
-            {
-                if let Some(token) = &auth_context.access_token {
-                    html! { <p>{ format!("Access token: {}", token) }</p> }
-                } else {
-                    html! {}
+        <div class="card">
+            <div class="card-body">
+                <h1 class="card-title text-center mb-4">{ "Inscription" }</h1>
+                <form onsubmit={on_submit}>
+                    <div class="mb-3">
+                        <input
+                            type="text"
+                            class="form-control"
+                            placeholder="Nom"
+                            value={(*name).clone()}
+                            oninput={Callback::from(move |e: InputEvent| {
+                                let input: HtmlInputElement = e.target_unchecked_into();
+                                name.set(input.value());
+                            })}
+                        />
+                    </div>
+                    <div class="mb-3">
+                        <input
+                            type="email"
+                            class="form-control"
+                            placeholder="Email"
+                            value={(*email).clone()}
+                            oninput={Callback::from(move |e: InputEvent| {
+                                let input: HtmlInputElement = e.target_unchecked_into();
+                                email.set(input.value());
+                            })}
+                        />
+                    </div>
+                    <div class="mb-3">
+                        <input
+                            type="password"
+                            class="form-control"
+                            placeholder="Mot de passe"
+                            value={(*password).clone()}
+                            oninput={Callback::from(move |e: InputEvent| {
+                                let input: HtmlInputElement = e.target_unchecked_into();
+                                password.set(input.value());
+                            })}
+                        />
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success">{ "S'inscrire" }</button>
+                    </div>
+                </form>
+                {
+                    if !(*response_message).is_empty() {
+                        html! {
+                            <div class="alert alert-info mt-3" role="alert">
+                                { (*response_message).clone() }
+                            </div>
+                        }
+                    } else {
+                        html! {}
+                    }
                 }
-            }
+                {
+                    if let Some(token) = &auth_context.access_token {
+                        html! { 
+                            <div class="alert alert-success mt-3" role="alert">
+                                <small>{ format!("Access token: {}", token) }</small>
+                            </div>
+                        }
+                    } else {
+                        html! {}
+                    }
+                }
+            </div>
         </div>
     }
 }

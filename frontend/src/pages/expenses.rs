@@ -5,6 +5,7 @@ use yew::TargetCast;
 use serde::Serialize;
 use crate::context::auth::use_auth;
 use crate::types::{Expense, ExpenseCategory};
+use crate::components::expense_edit::EditExpenseModal;
 
 #[function_component(ExpenseComponent)]
 pub fn expense_component() -> Html {
@@ -13,6 +14,8 @@ pub fn expense_component() -> Html {
     let amount = use_state(|| "".to_string());
     let category = use_state(|| ExpenseCategory::Others);
     let response_message = use_state(|| "".to_string());
+    let show_edit_modal = use_state(|| false);
+    let edit_expense = use_state(|| None::<Expense>);
     let auth = use_auth();
 
     // Fetch expenses on mount if token exists
@@ -153,45 +156,43 @@ pub fn expense_component() -> Html {
     };
 
     // Update expense
-    let on_update = {
+    let on_update_click = {
+        let show_edit_modal = show_edit_modal.clone();
+        let edit_expense = edit_expense.clone();
+        Callback::from(move |expense: Expense| {
+            edit_expense.set(Some(expense));
+            show_edit_modal.set(true);
+        })
+    };
+
+    let on_edit_close = {
+        let show_edit_modal = show_edit_modal.clone();
+        let edit_expense = edit_expense.clone();
+        Callback::from(move |_| {
+            show_edit_modal.set(false);
+            edit_expense.set(None);
+        })
+    };
+
+    let on_edit_update = {
         let expenses = expenses.clone();
         let response_message = response_message.clone();
         let auth = auth.clone();
-        Callback::from(move |expense: Expense| {
+        Callback::from(move |_| {
             let expenses = expenses.clone();
-            let response_message = response_message.clone();
             let auth = auth.clone();
             wasm_bindgen_futures::spawn_local(async move {
                 if let Some(token) = &auth.access_token {
-                    let url = format!("http://localhost:3001/expenses/{}", expense.id);
-                    let res = Request::put(&url)
+                    let res = Request::get("http://localhost:3001/expenses")
                         .header("Authorization", &format!("Bearer {}", token))
-                        .header("Content-Type", "application/json")
-                        .json(&expense)
-                        .unwrap()
                         .send()
                         .await;
-                    match res {
-                        Ok(resp) => {
-                            if resp.status() == 200 {
-                                response_message.set("Dépense modifiée".to_string());
-                                // Refresh list
-                                let res = Request::get("http://localhost:3001/expenses")
-                                    .header("Authorization", &format!("Bearer {}", token))
-                                    .send()
-                                    .await;
-                                if let Ok(resp) = res {
-                                    if resp.status() == 200 {
-                                        if let Ok(list) = resp.json::<Vec<Expense>>().await {
-                                            expenses.set(list);
-                                        }
-                                    }
-                                }
-                            } else {
-                                response_message.set("Erreur lors de la modification".to_string());
+                    if let Ok(resp) = res {
+                        if resp.status() == 200 {
+                            if let Ok(list) = resp.json::<Vec<Expense>>().await {
+                                expenses.set(list);
                             }
                         }
-                        Err(_) => response_message.set("Erreur réseau".to_string()),
                     }
                 }
             });
@@ -199,87 +200,184 @@ pub fn expense_component() -> Html {
     };
 
     html! {
-        <div>
-            <h2>{ "Ajouter une dépense" }</h2>
-            <form onsubmit={on_create}>
-                <input
-                    type="text"
-                    placeholder="Description"
-                    value={(*description).clone()}
-                    oninput={{
-                        let description = description.clone();
-                        Callback::from(move |e: InputEvent| {
-                            let input: HtmlInputElement = e.target_unchecked_into();
-                            description.set(input.value());
-                        })
-                    }}
-                />
-                <input
-                    type="text"
-                    placeholder="Montant"
-                    value={(*amount).clone()}
-                    oninput={{
-                        let amount = amount.clone();
-                        Callback::from(move |e: InputEvent| {
-                            let input: HtmlInputElement = e.target_unchecked_into();
-                            amount.set(input.value());
-                        })
-                    }}
-                />
-                <select
-                    value={format!("{:?}", *category)}
-                    onchange={{
-                        let category = category.clone();
-                        Callback::from(move |e: Event| {
-                            let input: HtmlInputElement = e.target_unchecked_into();
-                            let value = input.value();
-                            let cat = match value.as_str() {
-                                "Groceries" => ExpenseCategory::Groceries,
-                                "Leisure" => ExpenseCategory::Leisure,
-                                "Electronics" => ExpenseCategory::Electronics,
-                                "Utilities" => ExpenseCategory::Utilities,
-                                "Clothing" => ExpenseCategory::Clothing,
-                                "Health" => ExpenseCategory::Health,
-                                _ => ExpenseCategory::Others,
-                            };
-                            category.set(cat);
-                        })
-                    }}
-                >
-                    <option value="Groceries">{ "Alimentation" }</option>
-                    <option value="Leisure">{ "Loisirs" }</option>
-                    <option value="Electronics">{ "Électronique" }</option>
-                    <option value="Utilities">{ "Factures" }</option>
-                    <option value="Clothing">{ "Vêtements" }</option>
-                    <option value="Health">{ "Santé" }</option>
-                    <option value="Others">{ "Autres" }</option>
-                </select>
-                <button type="submit">{ "Ajouter" }</button>
-            </form>
-            <p>{ (*response_message).clone() }</p>
-            <h2>{ "Liste des dépenses" }</h2>
-            <ul>
-                {
-                    for expenses.iter().map(|expense| {
-                        let exp = expense.clone();
-                        html! {
-                            <li>
-                                { format!("{}: {}€ ({:?})", exp.description.as_deref().unwrap_or(""), exp.amount, exp.category) }
-                                <button onclick={{
-                                    let on_delete = on_delete.clone();
-                                    let id = exp.id;
-                                    Callback::from(move |_| on_delete.emit(id))
-                                }}>{ "Supprimer" }</button>
-                                <button onclick={{
-                                    let on_update = on_update.clone();
-                                    let exp = exp.clone();
-                                    Callback::from(move |_| on_update.emit(exp.clone()))
-                                }}>{ "Modifier" }</button>
-                            </li>
-                        }
-                    })
-                }
-            </ul>
-        </div>
+        <>
+            <div class="container mt-4">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title mb-0">{ "Ajouter une dépense" }</h3>
+                            </div>
+                            <div class="card-body">
+                                <form onsubmit={on_create}>
+                                    <div class="mb-3">
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            placeholder="Description"
+                                            value={(*description).clone()}
+                                            oninput={{
+                                                let description = description.clone();
+                                                Callback::from(move |e: InputEvent| {
+                                                    let input: HtmlInputElement = e.target_unchecked_into();
+                                                    description.set(input.value());
+                                                })
+                                            }}
+                                        />
+                                    </div>
+                                    <div class="mb-3">
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            class="form-control"
+                                            placeholder="Montant (€)"
+                                            value={(*amount).clone()}
+                                            oninput={{
+                                                let amount = amount.clone();
+                                                Callback::from(move |e: InputEvent| {
+                                                    let input: HtmlInputElement = e.target_unchecked_into();
+                                                    amount.set(input.value());
+                                                })
+                                            }}
+                                        />
+                                    </div>
+                                    <div class="mb-3">
+                                        <select
+                                            class="form-select"
+                                            value={format!("{:?}", *category)}
+                                            onchange={{
+                                                let category = category.clone();
+                                                Callback::from(move |e: Event| {
+                                                    let input: HtmlInputElement = e.target_unchecked_into();
+                                                    let value = input.value();
+                                                    let cat = match value.as_str() {
+                                                        "Groceries" => ExpenseCategory::Groceries,
+                                                        "Leisure" => ExpenseCategory::Leisure,
+                                                        "Electronics" => ExpenseCategory::Electronics,
+                                                        "Utilities" => ExpenseCategory::Utilities,
+                                                        "Clothing" => ExpenseCategory::Clothing,
+                                                        "Health" => ExpenseCategory::Health,
+                                                        _ => ExpenseCategory::Others,
+                                                    };
+                                                    category.set(cat);
+                                                })
+                                            }}
+                                        >
+                                            <option value="Groceries">{ "Alimentation" }</option>
+                                            <option value="Leisure">{ "Loisirs" }</option>
+                                            <option value="Electronics">{ "Électronique" }</option>
+                                            <option value="Utilities">{ "Factures" }</option>
+                                            <option value="Clothing">{ "Vêtements" }</option>
+                                            <option value="Health">{ "Santé" }</option>
+                                            <option value="Others">{ "Autres" }</option>
+                                        </select>
+                                    </div>
+                                    <div class="d-grid">
+                                        <button type="submit" class="btn btn-primary">{ "Ajouter" }</button>
+                                    </div>
+                                </form>
+                                {
+                                    if !(*response_message).is_empty() {
+                                        html! {
+                                            <div class="alert alert-info mt-3" role="alert">
+                                                { (*response_message).clone() }
+                                            </div>
+                                        }
+                                    } else {
+                                        html! {}
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title mb-0">{ "Liste des dépenses" }</h3>
+                            </div>
+                            <div class="card-body">
+                                {
+                                    if expenses.is_empty() {
+                                        html! {
+                                            <div class="text-center text-muted">
+                                                <p>{ "Aucune dépense enregistrée" }</p>
+                                            </div>
+                                        }
+                                    } else {
+                                        html! {
+                                            <div class="list-group">
+                                                {
+                                                    for expenses.iter().map(|expense| {
+                                                        let exp = expense.clone();
+                                                        let category_badge_class = match exp.category {
+                                                            ExpenseCategory::Groceries => "bg-success",
+                                                            ExpenseCategory::Leisure => "bg-primary",
+                                                            ExpenseCategory::Electronics => "bg-info",
+                                                            ExpenseCategory::Utilities => "bg-warning",
+                                                            ExpenseCategory::Clothing => "bg-secondary",
+                                                            ExpenseCategory::Health => "bg-danger",
+                                                            ExpenseCategory::Others => "bg-dark",
+                                                        };
+                                                        let category_text = match exp.category {
+                                                            ExpenseCategory::Groceries => "Alimentation",
+                                                            ExpenseCategory::Leisure => "Loisirs",
+                                                            ExpenseCategory::Electronics => "Électronique",
+                                                            ExpenseCategory::Utilities => "Factures",
+                                                            ExpenseCategory::Clothing => "Vêtements",
+                                                            ExpenseCategory::Health => "Santé",
+                                                            ExpenseCategory::Others => "Autres",
+                                                        };
+                                                        html! {
+                                                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                                <div>
+                                                                    <h6 class="mb-1">{ exp.description.as_deref().unwrap_or("Sans description") }</h6>
+                                                                    <p class="mb-1 text-success fw-bold">{ format!("{}€", exp.amount) }</p>
+                                                                    <span class={format!("badge {}", category_badge_class)}>{ category_text }</span>
+                                                                </div>
+                                                                <div class="btn-group" role="group">
+                                                                    <button 
+                                                                        type="button"
+                                                                        class="btn btn-outline-primary btn-sm"
+                                                                        onclick={{
+                                                                            let on_update_click = on_update_click.clone();
+                                                                            let exp = exp.clone();
+                                                                            Callback::from(move |_| on_update_click.emit(exp.clone()))
+                                                                        }}
+                                                                    >
+                                                                        { "✏️" }
+                                                                    </button>
+                                                                    <button 
+                                                                        type="button"
+                                                                        class="btn btn-outline-danger btn-sm"
+                                                                        onclick={{
+                                                                            let on_delete = on_delete.clone();
+                                                                            let id = exp.id;
+                                                                            Callback::from(move |_| on_delete.emit(id))
+                                                                        }}
+                                                                    >
+                                                                        { "🗑️" }
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                    })
+                                                }
+                                            </div>
+                                        }
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <EditExpenseModal
+                expense={(*edit_expense).clone()}
+                show={*show_edit_modal}
+                on_close={on_edit_close}
+                on_update={on_edit_update}
+            />
+        </>
     }
 }
