@@ -10,6 +10,7 @@ pub trait UserRepository: Send + Sync {
     async fn create(&self, payload: CreateUserPayload) -> Result<User>;
     async fn exists_by_email(&self, email: &str) -> Result<bool>;
     async fn find_by_email(&self, email: &str) -> Result<Option<User>>;
+    async fn find_by_id(&self, id: i32) -> Result<Option<User>>;
 }
 
 pub struct UserRepositoryImpl {
@@ -52,5 +53,12 @@ impl UserRepository for UserRepositoryImpl {
                 .context("Failed to check if user exists")?;
 
         Ok(exists.unwrap_or(false))
+    }
+
+    async fn find_by_id(&self, id: i32) -> Result<Option<User>> {
+        sqlx::query_as!(User, "SELECT * FROM users WHERE id = $1", id)
+            .fetch_optional(&*self.pool)
+            .await
+            .with_context(|| format!("Failed to find user by id: {}", id))
     }
 }
