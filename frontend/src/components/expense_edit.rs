@@ -1,6 +1,6 @@
 use yew::prelude::*;
 use gloo_net::http::Request;
-use web_sys::HtmlInputElement;
+use web_sys::{HtmlInputElement, console};
 use yew::TargetCast;
 use crate::context::auth::use_auth;
 use crate::types::{Expense, ExpenseCategory};
@@ -38,7 +38,7 @@ pub fn edit_expense_modal(props: &EditExpenseModalProps) -> Html {
         });
     }
 
-    let on_submit = {
+    let on_save = {
         let description = description.clone();
         let amount = amount.clone();
         let category = category.clone();
@@ -48,8 +48,8 @@ pub fn edit_expense_modal(props: &EditExpenseModalProps) -> Html {
         let on_update = props.on_update.clone();
         let on_close = props.on_close.clone();
 
-        Callback::from(move |e: SubmitEvent| {
-            e.prevent_default();
+        Callback::from(move |_: MouseEvent| {
+            console::log_1(&"on_save clicked".into());
             
             if let Some(exp) = &expense {
                 let description = description.clone();
@@ -62,6 +62,8 @@ pub fn edit_expense_modal(props: &EditExpenseModalProps) -> Html {
                 let on_close = on_close.clone();
 
                 wasm_bindgen_futures::spawn_local(async move {
+                    console::log_1(&format!("auth.access_token: {:?}", auth.access_token).into());
+                    
                     if let Some(token) = &auth.access_token {
                         let updated_expense = Expense {
                             id: expense_id,
@@ -71,7 +73,7 @@ pub fn edit_expense_modal(props: &EditExpenseModalProps) -> Html {
                             expense_date: chrono::Utc::now().naive_utc(),
                         };
 
-                        let url = format!("http://localhost:3001/expenses/{}", expense_id);
+                        let url = "http://localhost:3001/expenses";
                         let res = Request::put(&url)
                             .header("Authorization", &format!("Bearer {}", token))
                             .header("Content-Type", "application/json")
@@ -82,6 +84,7 @@ pub fn edit_expense_modal(props: &EditExpenseModalProps) -> Html {
 
                         match res {
                             Ok(resp) => {
+                                console::log_1(&format!("Response status: {}", resp.status()).into());
                                 if resp.status() == 200 {
                                     response_message.set("Dépense modifiée avec succès".to_string());
                                     on_update.emit(());
@@ -90,10 +93,18 @@ pub fn edit_expense_modal(props: &EditExpenseModalProps) -> Html {
                                     response_message.set("Erreur lors de la modification".to_string());
                                 }
                             }
-                            Err(_) => response_message.set("Erreur réseau".to_string()),
+                            Err(e) => {
+                                console::log_1(&format!("Request error: {:?}", e).into());
+                                response_message.set("Erreur réseau".to_string());
+                            }
                         }
+                    } else {
+                        console::log_1(&"No access_token found".into());
+                        response_message.set("Token d'authentification manquant".to_string());
                     }
                 });
+            } else {
+                console::log_1(&"No expense found".into());
             }
         })
     };
@@ -118,84 +129,82 @@ pub fn edit_expense_modal(props: &EditExpenseModalProps) -> Html {
                         ></button>
                     </div>
                     <div class="modal-body">
-                        <form onsubmit={on_submit}>
-                            <div class="mb-3">
-                                <label class="form-label">{ "Description" }</label>
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    placeholder="Description"
-                                    value={(*description).clone()}
-                                    oninput={{
-                                        let description = description.clone();
-                                        Callback::from(move |e: InputEvent| {
-                                            let input: HtmlInputElement = e.target_unchecked_into();
-                                            description.set(input.value());
-                                        })
-                                    }}
-                                />
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">{ "Montant (€)" }</label>
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    class="form-control"
-                                    placeholder="Montant (€)"
-                                    value={(*amount).clone()}
-                                    oninput={{
-                                        let amount = amount.clone();
-                                        Callback::from(move |e: InputEvent| {
-                                            let input: HtmlInputElement = e.target_unchecked_into();
-                                            amount.set(input.value());
-                                        })
-                                    }}
-                                />
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">{ "Catégorie" }</label>
-                                <select
-                                    class="form-select"
-                                    value={format!("{:?}", *category)}
-                                    onchange={{
-                                        let category = category.clone();
-                                        Callback::from(move |e: Event| {
-                                            let input: HtmlInputElement = e.target_unchecked_into();
-                                            let value = input.value();
-                                            let cat = match value.as_str() {
-                                                "Groceries" => ExpenseCategory::Groceries,
-                                                "Leisure" => ExpenseCategory::Leisure,
-                                                "Electronics" => ExpenseCategory::Electronics,
-                                                "Utilities" => ExpenseCategory::Utilities,
-                                                "Clothing" => ExpenseCategory::Clothing,
-                                                "Health" => ExpenseCategory::Health,
-                                                _ => ExpenseCategory::Others,
-                                            };
-                                            category.set(cat);
-                                        })
-                                    }}
-                                >
-                                    <option value="Groceries">{ "Alimentation" }</option>
-                                    <option value="Leisure">{ "Loisirs" }</option>
-                                    <option value="Electronics">{ "Électronique" }</option>
-                                    <option value="Utilities">{ "Factures" }</option>
-                                    <option value="Clothing">{ "Vêtements" }</option>
-                                    <option value="Health">{ "Santé" }</option>
-                                    <option value="Others">{ "Autres" }</option>
-                                </select>
-                            </div>
-                            {
-                                if !(*response_message).is_empty() {
-                                    html! {
-                                        <div class="alert alert-info" role="alert">
-                                            { (*response_message).clone() }
-                                        </div>
-                                    }
-                                } else {
-                                    html! {}
+                        <div class="mb-3">
+                            <label class="form-label">{ "Description" }</label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                placeholder="Description"
+                                value={(*description).clone()}
+                                oninput={{
+                                    let description = description.clone();
+                                    Callback::from(move |e: InputEvent| {
+                                        let input: HtmlInputElement = e.target_unchecked_into();
+                                        description.set(input.value());
+                                    })
+                                }}
+                            />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">{ "Montant (€)" }</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                class="form-control"
+                                placeholder="Montant (€)"
+                                value={(*amount).clone()}
+                                oninput={{
+                                    let amount = amount.clone();
+                                    Callback::from(move |e: InputEvent| {
+                                        let input: HtmlInputElement = e.target_unchecked_into();
+                                        amount.set(input.value());
+                                    })
+                                }}
+                            />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">{ "Catégorie" }</label>
+                            <select
+                                class="form-select"
+                                value={format!("{:?}", *category)}
+                                onchange={{
+                                    let category = category.clone();
+                                    Callback::from(move |e: Event| {
+                                        let input: HtmlInputElement = e.target_unchecked_into();
+                                        let value = input.value();
+                                        let cat = match value.as_str() {
+                                            "Groceries" => ExpenseCategory::Groceries,
+                                            "Leisure" => ExpenseCategory::Leisure,
+                                            "Electronics" => ExpenseCategory::Electronics,
+                                            "Utilities" => ExpenseCategory::Utilities,
+                                            "Clothing" => ExpenseCategory::Clothing,
+                                            "Health" => ExpenseCategory::Health,
+                                            _ => ExpenseCategory::Others,
+                                        };
+                                        category.set(cat);
+                                    })
+                                }}
+                            >
+                                <option value="Groceries">{ "Alimentation" }</option>
+                                <option value="Leisure">{ "Loisirs" }</option>
+                                <option value="Electronics">{ "Électronique" }</option>
+                                <option value="Utilities">{ "Factures" }</option>
+                                <option value="Clothing">{ "Vêtements" }</option>
+                                <option value="Health">{ "Santé" }</option>
+                                <option value="Others">{ "Autres" }</option>
+                            </select>
+                        </div>
+                        {
+                            if !(*response_message).is_empty() {
+                                html! {
+                                    <div class="alert alert-info" role="alert">
+                                        { (*response_message).clone() }
+                                    </div>
                                 }
+                            } else {
+                                html! {}
                             }
-                        </form>
+                        }
                     </div>
                     <div class="modal-footer">
                         <button 
@@ -209,8 +218,9 @@ pub fn edit_expense_modal(props: &EditExpenseModalProps) -> Html {
                             { "Annuler" }
                         </button>
                         <button 
-                            type="submit" 
+                            type="button" 
                             class="btn btn-primary"
+                            onclick={on_save}
                         >
                             { "Sauvegarder" }
                         </button>
