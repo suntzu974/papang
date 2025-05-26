@@ -5,24 +5,28 @@ use crate::context::auth::use_auth;
 pub fn header() -> Html {
     let auth = use_auth();
     html! {
-        <header class="bg-dark text-white py-3">
-            <div class="container">
-                <h1 class="text-center mb-3">{ "Papang - Gestion des Dépenses" }</h1>
-                <Navbar />
-                {
-                    if let Some(token) = &auth.token {
-                        html! {
-                            <div class="text-center mt-3">
-                                <small class="text-success">
+        <header>
+            <nav class="navbar navbar-dark bg-dark py-3 mb-4">
+                <div class="container">
+                    <span class="navbar-brand mx-auto h1 mb-0">{ "Papang - Gestion des Dépenses" }</span>
+                </div>
+            </nav>
+            <Navbar />
+            {
+                if let Some(token) = &auth.token {
+                    html! {
+                        <div class="container">
+                            <div class="alert alert-success text-center py-2 mb-0" role="alert">
+                                <small>
                                     { format!("Connecté - Token: {}...", &token[..token.len().min(20)]) }
                                 </small>
                             </div>
-                        }
-                    } else {
-                        html! {}
+                        </div>
                     }
+                } else {
+                    html! {}
                 }
-            </div>
+            }
         </header>
     }
 }
@@ -68,9 +72,9 @@ fn navbar() -> Html {
 #[function_component(Footer)]
 pub fn footer() -> Html {
     html! {
-        <footer class="bg-dark text-white text-center py-3 mt-auto">
-            <div class="container">
-                <span>{ "© 2024 Papang - Gestion des Dépenses" }</span>
+        <footer class="footer py-3 bg-dark fixed-bottom">
+            <div class="container text-center">
+                <span class="text-white-50">{ "© 2024 Papang - Gestion des Dépenses" }</span>
             </div>
         </footer>
     }

@@ -94,3 +94,8 @@ FROM pg_enum
 WHERE enumtypid = 'expense_category'::regtype
 ORDER BY enumsortorder;
 ```
+## ajouter wasm32-unknown-unknown pour trunk
+```sh
+rustup target add wasm32-unknown-unknown
+
+```
