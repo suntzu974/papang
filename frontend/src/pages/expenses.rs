@@ -138,7 +138,7 @@ pub fn expense_component() -> Html {
                         .await;
                     match res {
                         Ok(resp) => {
-                            if resp.status() == 200 {
+                            if resp.status() == 204 {
                                 response_message.set("Dépense supprimée".to_string());
                                 // Refresh list
                                 let res = Request::get("http://localhost:3001/expenses")
