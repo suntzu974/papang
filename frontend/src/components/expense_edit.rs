@@ -33,6 +33,7 @@ pub fn edit_expense_modal(props: &EditExpenseModalProps) -> Html {
                 description.set(exp.description.clone().unwrap_or_default());
                 amount.set(exp.amount.to_string());
                 category.set(exp.category);
+                console::log_1(&format!("Initialized category from record: {:?}", exp.category).into());
             }
             || ()
         });

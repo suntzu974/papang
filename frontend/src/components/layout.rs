@@ -13,13 +13,21 @@ pub fn header() -> Html {
             </nav>
             <Navbar />
             {
-                if let Some(token) = &auth.token {
+                if let Some(user) = &auth.user {
                     html! {
                         <div class="container">
                             <div class="alert alert-success text-center py-2 mb-0" role="alert">
                                 <small>
-                                    { format!("Connecté - Token: {}...", &token[..token.len().min(20)]) }
+                                    { format!("Connecté - {}", user.name) }
                                 </small>
+                            </div>
+                        </div>
+                    }
+                } else if auth.token.is_some() {
+                    html! {
+                        <div class="container">
+                            <div class="alert alert-info text-center py-2 mb-0" role="alert">
+                                <small>{ "Connecté" }</small>
                             </div>
                         </div>
                     }
