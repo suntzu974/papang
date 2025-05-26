@@ -1,3 +1,6 @@
 pub mod main;
-pub mod auth;
+pub mod login;
+pub mod register;
 pub mod expenses;
+pub mod profile;
+pub mod auth;

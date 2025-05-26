@@ -6,6 +6,8 @@ use serde::Serialize;
 use crate::context::auth::use_auth;
 use crate::types::{Expense, ExpenseCategory};
 use crate::components::expense_edit::EditExpenseModal;
+use yew_router::prelude::*;
+use crate::{Route};
 
 #[function_component(ExpenseComponent)]
 pub fn expense_component() -> Html {
@@ -17,6 +19,12 @@ pub fn expense_component() -> Html {
     let show_edit_modal = use_state(|| false);
     let edit_expense = use_state(|| None::<Expense>);
     let auth = use_auth();
+    let navigator = use_navigator().unwrap();
+
+    // Redirect if not logged in
+    if auth.token.is_none() {
+        navigator.push(&Route::Login);
+    }
 
     // Fetch expenses on mount if token exists
     {

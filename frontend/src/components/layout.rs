@@ -1,16 +1,34 @@
+use web_sys::console;
 use yew::prelude::*;
+use yew_router::prelude::*;
 use crate::context::auth::use_auth;
+
+// Define routes
+#[derive(Clone, Routable, PartialEq)]
+pub enum Route {
+    #[at("/")]
+    Home,
+    #[at("/login")]
+    Login,
+    #[at("/register")]
+    Register,
+    #[at("/expenses")]
+    Expenses,
+    #[at("/profile")]
+    Profile,
+    #[at("/logout")]
+    Logout,
+}
 
 #[function_component(Header)]
 pub fn header() -> Html {
     let auth = use_auth();
     html! {
         <header>
-            <nav class="navbar navbar-dark bg-dark py-3 mb-4">
-                <div class="container">
-                    <span class="navbar-brand mx-auto h1 mb-0">{ "Papang - Gestion des Dépenses" }</span>
+            <div class="bg-primary text-white text-center py-2 mb-3">
+                <h1 class="m-0">{ "Papang - Gestion des Dépenses" }</h1>
+                <p class="mb-0">{ "Gérez vos dépenses facilement et efficacement" }</p>
                 </div>
-            </nav>
             <Navbar />
             {
                 if let Some(user) = &auth.user {
@@ -42,6 +60,20 @@ pub fn header() -> Html {
 #[function_component(Navbar)]
 fn navbar() -> Html {
     let auth = use_auth();
+    let navigator = use_navigator().unwrap();
+    console::log_1(&"Rendering Navbar".into());
+    console::log_1(&format!("Access Token: {:?}", auth.access_token).into());
+    console::log_1(&format!("User: {:?}", auth.user).into());
+    let on_logout = {
+        let set_token = auth.set_token.clone();
+        let set_user = auth.set_user.clone();
+        let navigator = navigator.clone();
+        Callback::from(move |_| {
+            set_token.emit(None);
+            set_user.emit(None);
+            navigator.push(&Route::Login);
+        })
+    };
     
     html! {
         <nav class="navbar navbar-expand-lg navbar-dark">
@@ -51,23 +83,33 @@ fn navbar() -> Html {
                         if auth.access_token.is_some() {
                             html! {
                                 <>
-                                    <a class="nav-link text-white mx-2" href="#">
+                                    <Link<Route> to={Route::Home} classes="nav-link text-white mx-2">
                                         <i class="bi bi-list-ul"></i>{ " Dépenses" }
-                                    </a>
+                                    </Link<Route>>
+                                    <Link<Route> to={Route::Expenses} classes="nav-link text-white mx-2">
+                                        <i class="bi bi-plus-circle"></i>{ " Ajouter" }
+                                    </Link<Route>>
+                                    <Link<Route> to={Route::Profile} classes="nav-link text-white mx-2">
+                                        <i class="bi bi-person"></i>{ " Profil" }
+                                    </Link<Route>>
                                     <button 
                                         class="btn btn-outline-light btn-sm mx-2"
-                                        onclick={{
-                                            let set_token = auth.set_token.clone();
-                                            Callback::from(move |_| set_token.emit(None))
-                                        }}
+                                        onclick={on_logout}
                                     >
-                                        { "Déconnexion" }
+                                        <i class="bi bi-box-arrow-right"></i>{ " Déconnexion" }
                                     </button>
                                 </>
                             }
                         } else {
                             html! {
-                                <span class="nav-link text-muted">{ "Non connecté" }</span>
+                                <>
+                                    <Link<Route> to={Route::Login} classes="nav-link text-white mx-2">
+                                        <i class="bi bi-box-arrow-in-right"></i>{ " Connexion" }
+                                    </Link<Route>>
+                                    <Link<Route> to={Route::Register} classes="nav-link text-white mx-2">
+                                        <i class="bi bi-person-plus"></i>{ " Inscription" }
+                                    </Link<Route>>
+                                </>
                             }
                         }
                     }
