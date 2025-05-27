@@ -54,7 +54,7 @@ fn logout_page() -> Html {
     });
 
     html! {
-        <div class="container text-center">
+        <div class="container text-center bg-color-secondary text-white p-5">
             <p>{ "Déconnexion en cours..." }</p>
         </div>
     }

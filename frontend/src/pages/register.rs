@@ -1,6 +1,7 @@
 use yew::prelude::*;
 use yew_router::prelude::*;
 use crate::{context::auth::use_auth, Route};
+use crate::pages::auth::RegisterComponent;
 
 #[function_component(Register)]
 pub fn register() -> Html {
@@ -13,9 +14,6 @@ pub fn register() -> Html {
     }
 
     html! {
-        <div class="container">
-            <h2>{ "Inscription" }</h2>
-            // Add your register form here
-        </div>
+        <RegisterComponent/>
     }
 }

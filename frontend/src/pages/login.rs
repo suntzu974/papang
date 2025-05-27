@@ -2,6 +2,8 @@ use yew::prelude::*;
 use yew_router::prelude::*;
 use crate::{context::auth::use_auth, Route};
 
+use super::auth::LoginComponent;
+
 #[function_component(Login)]
 pub fn login() -> Html {
     let auth = use_auth();
@@ -11,11 +13,10 @@ pub fn login() -> Html {
     if auth.token.is_some() {
         navigator.push(&Route::Home);
     }
-
     html! {
-        <div class="container">
-            <h2>{ "Connexion" }</h2>
-            // Add your login form here
+        <div class="container text-center bg-color-secondary text-white p-5">
+            <h1>{ "Connexion" }</h1>
+            <LoginComponent />
         </div>
     }
 }

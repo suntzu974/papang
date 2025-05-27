@@ -27,8 +27,7 @@ pub fn header() -> Html {
         <header>
             <div class="bg-primary text-white text-center py-2 mb-3">
                 <h1 class="m-0">{ "Papang - Gestion des Dépenses" }</h1>
-                <p class="mb-0">{ "Gérez vos dépenses facilement et efficacement" }</p>
-                </div>
+            </div>
             <Navbar />
             {
                 if let Some(user) = &auth.user {
@@ -58,7 +57,7 @@ pub fn header() -> Html {
 }
 
 #[function_component(Navbar)]
-fn navbar() -> Html {
+pub fn navbar() -> Html {
     let auth = use_auth();
     let navigator = use_navigator().unwrap();
     console::log_1(&"Rendering Navbar".into());
@@ -81,6 +80,7 @@ fn navbar() -> Html {
                 <div class="navbar-nav">
                     {
                         if auth.access_token.is_some() {
+                            console::log_1(&"User is authenticated in NavBar".into());
                             html! {
                                 <>
                                     <Link<Route> to={Route::Home} classes="nav-link text-white mx-2">
@@ -101,6 +101,7 @@ fn navbar() -> Html {
                                 </>
                             }
                         } else {
+                            console::log_1(&"User is not authenticated for NavBar".into());
                             html! {
                                 <>
                                     <Link<Route> to={Route::Login} classes="nav-link text-white mx-2">
