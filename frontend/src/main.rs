@@ -78,9 +78,7 @@ fn app_root() -> Html {
             <BrowserRouter>
                 <Header />
                 <Navbar />
-                <main style="padding-bottom: 4em;">
                     <Switch<Route> render={switch} />
-                </main>
                 <Footer />
             </BrowserRouter>
         </AuthProvider>

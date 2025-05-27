@@ -32,7 +32,6 @@ pub fn header() -> Html {
             <div class="bg-primary text-white text-center py-2 mb-3">
                 <h1 class="m-0">{ "Papang - Gestion des Dépenses" }</h1>
             </div>
-//            <Navbar />
             {
                 if let Some(user) = &auth.user {
                     html! {

@@ -16,7 +16,7 @@ serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"
 wasm-bindgen = "0.2.100"
 wasm-bindgen-futures = "0.4.50"
-web-sys = { version = "0.3.77", features = ["console"] }
+web-sys = { version = "0.3.77", features = ["HtmlSelectElement", "console"] }
 yew = { version = "0.21", features = ["csr"] }
 yew-router = "0.18.0"
 

@@ -2,10 +2,11 @@ use yew::prelude::*;
 use yew_router::prelude::*;
 use gloo_net::http::Request;
 use crate::context::auth::use_auth;
-use crate::types::Expense;
+use crate::types::{Expense, ExpenseCategory};
 use crate::pages::expenses_list::ExpenseListComponent;
 use crate::components::expense_edit::EditExpenseModal;
 use crate::components::layout::Route;
+use web_sys::{HtmlInputElement, console};
 
 #[function_component(ManageExpenses)]
 pub fn manage_expenses() -> Html {
@@ -14,6 +15,7 @@ pub fn manage_expenses() -> Html {
     let expenses = use_state(|| vec![] as Vec<Expense>);
     let show_edit_modal = use_state(|| false);
     let edit_expense = use_state(|| None::<Expense>);
+    let selected_category = use_state(|| None::<ExpenseCategory>);
 
     // Redirect if not logged in
     if auth.token.is_none() {
@@ -127,6 +129,40 @@ pub fn manage_expenses() -> Html {
         })
     };
 
+    // Filter expenses by category
+    let filtered_expenses = {
+        let expenses = (*expenses).clone();
+        let selected_category = (*selected_category).clone();
+        
+        if let Some(category) = selected_category {
+            expenses.into_iter().filter(|e| e.category == category).collect::<Vec<_>>()
+        } else {
+            expenses
+        }
+    };
+
+    let on_category_filter = {
+        let selected_category = selected_category.clone();
+        Callback::from(move |e: Event| {
+            let input: web_sys::HtmlSelectElement = e.target_unchecked_into();
+            let value = input.value();
+            let category = if value == "all" {
+                None
+            } else {
+                Some(match value.as_str() {
+                    "Groceries" => ExpenseCategory::Groceries,
+                    "Leisure" => ExpenseCategory::Leisure,
+                    "Electronics" => ExpenseCategory::Electronics,
+                    "Utilities" => ExpenseCategory::Utilities,
+                    "Clothing" => ExpenseCategory::Clothing,
+                    "Health" => ExpenseCategory::Health,
+                    _ => ExpenseCategory::Others,
+                })
+            };
+            selected_category.set(category);
+        })
+    };
+
     html! {
         <>
             <div class="container mt-4">
@@ -140,12 +176,36 @@ pub fn manage_expenses() -> Html {
                         </div>
                         
                         <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0">{ format!("Mes dépenses ({} au total)", expenses.len()) }</h5>
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">{ format!("Mes dépenses ({} au total)", filtered_expenses.len()) }</h5>
+                                <div class="d-flex align-items-center">
+                                    <label class="form-label me-2 mb-0">{ "Filtrer par catégorie:" }</label>
+                                    <select 
+                                        class="form-select form-select-sm" 
+                                        style="width: auto;"
+                                        onchange={on_category_filter}
+                                        value={
+                                            if let Some(cat) = *selected_category {
+                                                format!("{:?}", cat)
+                                            } else {
+                                                "all".to_string()
+                                            }
+                                        }
+                                    >
+                                        <option value="all">{ "Toutes les catégories" }</option>
+                                        <option value="Groceries">{ "Alimentation" }</option>
+                                        <option value="Leisure">{ "Loisirs" }</option>
+                                        <option value="Electronics">{ "Électronique" }</option>
+                                        <option value="Utilities">{ "Factures" }</option>
+                                        <option value="Clothing">{ "Vêtements" }</option>
+                                        <option value="Health">{ "Santé" }</option>
+                                        <option value="Others">{ "Autres" }</option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="card-body">
                                 <ExpenseListComponent
-                                    expenses={(*expenses).clone()}
+                                    expenses={filtered_expenses}
                                     on_update_click={on_update_click.clone()}
                                     on_delete={on_delete.clone()}
                                 />
