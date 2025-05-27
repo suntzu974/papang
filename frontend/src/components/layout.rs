@@ -90,7 +90,7 @@ pub fn navbar() -> Html {
                                         <i class="bi bi-person"></i>{ " Profil" }
                                     </Link<Route>>
                                     <button 
-                                        class="btn btn-outline-light btn-sm mx-2 color-secondary"
+                                        class="btn  btn-sm mx-2 color-secondary"
                                         onclick={on_logout}
                                     >
                                         <i class="bi bi-box-arrow-right"></i>{ " Déconnexion" }

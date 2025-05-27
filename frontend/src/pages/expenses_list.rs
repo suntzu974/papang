@@ -18,7 +18,7 @@ pub fn expense_list_component(props: &ExpenseListProps) -> Html {
         }
     } else {
         html! {
-            <div class="list-group">
+            <div class="list-group" style="max-height: 400px; overflow-y: auto;">
                 {
                     for props.expenses.iter().map(|expense| {
                         let exp = expense.clone();

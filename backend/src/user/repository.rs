@@ -11,6 +11,7 @@ pub trait UserRepository: Send + Sync {
     async fn exists_by_email(&self, email: &str) -> Result<bool>;
     async fn find_by_email(&self, email: &str) -> Result<Option<User>>;
     async fn find_by_id(&self, id: i32) -> Result<Option<User>>;
+    async fn update_name(&self, id: i32, name: &str) -> Result<Option<User>>;
 }
 
 pub struct UserRepositoryImpl {
@@ -60,5 +61,17 @@ impl UserRepository for UserRepositoryImpl {
             .fetch_optional(&*self.pool)
             .await
             .with_context(|| format!("Failed to find user by id: {}", id))
+    }
+
+    async fn update_name(&self, id: i32, name: &str) -> Result<Option<User>> {
+        sqlx::query_as!(
+            User,
+            "UPDATE users SET name = $1 WHERE id = $2 RETURNING *",
+            name,
+            id
+        )
+        .fetch_optional(&*self.pool)
+        .await
+        .with_context(|| format!("Failed to update user name for id: {}", id))
     }
 }

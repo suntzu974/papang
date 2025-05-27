@@ -98,6 +98,10 @@ pub fn expense_component() -> Html {
                         Ok(resp) => {
                             if resp.status() == 201 {
                                 response_message.set("Dépense ajoutée".to_string());
+                                // Clear the form
+                                description.set("".to_string());
+                                amount.set("".to_string());
+                                category.set(ExpenseCategory::Others);
                                 // Refresh list
                                 let res = Request::get("http://localhost:3001/expenses")
                                     .header("Authorization", &format!("Bearer {}", token))

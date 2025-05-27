@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Yew</title>
+    <title>Papang</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+       <!-- Bootstrap Icons CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     
 <script type="module">
-import init, * as bindings from '/frontend-c1df6de3c19db8fc.js';
-const wasm = await init({ module_or_path: '/frontend-c1df6de3c19db8fc_bg.wasm' });
+import init, * as bindings from '/frontend-61f52752d0304249.js';
+const wasm = await init({ module_or_path: '/frontend-61f52752d0304249_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -17,7 +19,7 @@ window.wasmBindings = bindings;
 dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
 
 </script>
-<link rel="modulepreload" href="/frontend-c1df6de3c19db8fc.js" crossorigin="anonymous" integrity="sha384-5WiraQJpriNvoI6ffQ6irNHo5x/RwvHygn8HIU/PFB0qfnBm5/RlUqoPnJmAJO83"><link rel="preload" href="/frontend-c1df6de3c19db8fc_bg.wasm" crossorigin="anonymous" integrity="sha384-kPy3DAPagd9In0pbWjZhDskkJUhOHDyDZ9XFPJleW6FZzNEFHcC9tLZw5uEBbf5q" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/frontend-61f52752d0304249.js" crossorigin="anonymous" integrity="sha384-I1IZEtERepPGxfF1ONWkmiRD9ZC1NAftv2RWBCeC4NxpPbj24MK40/JrjRzYH+KH"><link rel="preload" href="/frontend-61f52752d0304249_bg.wasm" crossorigin="anonymous" integrity="sha384-F6BKHxMoQppBiRTNIGZu6IQEpWwVav+MpqBHHgs0Gu2lCf5aeor1Zv54OT5u5Qg/" as="fetch" type="application/wasm"></head>
 <body>
     <noscript>Vous devez activer JavaScript pour utiliser cette application.</noscript>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
