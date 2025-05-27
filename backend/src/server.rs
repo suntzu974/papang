@@ -5,7 +5,7 @@ use axum::Router;
 use sqlx::Postgres;
 use tokio::{net::TcpListener, signal};
 use tower_http::cors::CorsLayer;
-use axum::http::{HeaderValue,Method};
+use axum::http::Method;
 use axum::http::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE};
 use crate::{
     auth,

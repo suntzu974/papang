@@ -3,14 +3,22 @@ name = "frontend"
 version = "0.1.0"
 edition = "2024"
 
+[[bin]]
+name = "frontend"
+path = "src/main.rs"
+
 [dependencies]
 bigdecimal = { version = "0.4.8", features = ["serde"] }
 chrono = { version = "0.4.41", features = ["serde"] }
+gloo = "0.11.0"
+gloo-dialogs = "0.2.0"
 gloo-net = "0.6.0"
+itertools = "0.14.0"
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"
 wasm-bindgen = "0.2.100"
 wasm-bindgen-futures = "0.4.50"
-web-sys = "0.3.77"
-yew = { version = "0.21.0", features = ["csr"] }
+web-sys = { version = "0.3.77", features = ["HtmlSelectElement", "console"] }
+yew = { version = "0.21", features = ["csr"] }
+yew-router = "0.18.0"
 
