@@ -28,7 +28,7 @@ pub fn header() -> Html {
             <div class="bg-primary text-white text-center py-2 mb-3">
                 <h1 class="m-0">{ "Papang - Gestion des Dépenses" }</h1>
             </div>
-            <Navbar />
+//            <Navbar />
             {
                 if let Some(user) = &auth.user {
                     html! {
@@ -83,17 +83,14 @@ pub fn navbar() -> Html {
                             console::log_1(&"User is authenticated in NavBar".into());
                             html! {
                                 <>
-                                    <Link<Route> to={Route::Home} classes="nav-link text-white mx-2">
+                                    <Link<Route> to={Route::Home} classes="nav-link text-black mx-2">
                                         <i class="bi bi-list-ul"></i>{ " Dépenses" }
                                     </Link<Route>>
-                                    <Link<Route> to={Route::Expenses} classes="nav-link text-white mx-2">
-                                        <i class="bi bi-plus-circle"></i>{ " Ajouter" }
-                                    </Link<Route>>
-                                    <Link<Route> to={Route::Profile} classes="nav-link text-white mx-2">
+                                    <Link<Route> to={Route::Profile} classes="nav-link text-black mx-2">
                                         <i class="bi bi-person"></i>{ " Profil" }
                                     </Link<Route>>
                                     <button 
-                                        class="btn btn-outline-light btn-sm mx-2"
+                                        class="btn btn-outline-light btn-sm mx-2 color-secondary"
                                         onclick={on_logout}
                                     >
                                         <i class="bi bi-box-arrow-right"></i>{ " Déconnexion" }
@@ -104,10 +101,10 @@ pub fn navbar() -> Html {
                             console::log_1(&"User is not authenticated for NavBar".into());
                             html! {
                                 <>
-                                    <Link<Route> to={Route::Login} classes="nav-link text-white mx-2">
+                                    <Link<Route> to={Route::Login} classes="nav-link text-danger mx-2">
                                         <i class="bi bi-box-arrow-in-right"></i>{ " Connexion" }
                                     </Link<Route>>
-                                    <Link<Route> to={Route::Register} classes="nav-link text-white mx-2">
+                                    <Link<Route> to={Route::Register} classes="nav-link text-black mx-2">
                                         <i class="bi bi-person-plus"></i>{ " Inscription" }
                                     </Link<Route>>
                                 </>

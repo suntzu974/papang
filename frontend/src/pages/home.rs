@@ -9,7 +9,7 @@ pub fn home_component() -> Html {
 
     html! {
         if auth.access_token.is_some() {
-            <Navbar />
+            <ExpenseComponent />
         } else {
             <LoginComponent /> 
         }

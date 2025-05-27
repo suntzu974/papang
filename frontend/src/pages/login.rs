@@ -14,8 +14,7 @@ pub fn login() -> Html {
         navigator.push(&Route::Home);
     }
     html! {
-        <div class="container text-center bg-color-secondary text-white p-5">
-            <h1>{ "Connexion" }</h1>
+        <div class="container text-center bg-color-secondary text-black p-5">
             <LoginComponent />
         </div>
     }

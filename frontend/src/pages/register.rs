@@ -14,6 +14,8 @@ pub fn register() -> Html {
     }
 
     html! {
-        <RegisterComponent/>
+        <div class="container text-center bg-color-secondary text-black p-5">
+            <RegisterComponent />
+        </div>
     }
 }

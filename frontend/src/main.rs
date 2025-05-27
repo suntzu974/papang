@@ -15,6 +15,7 @@ use pages::{
     profile::Profile,
 };
 use context::auth::AuthProvider;
+use crate::components::layout::Navbar;
 
 #[derive(Clone, Routable, PartialEq)]
 enum Route {
@@ -66,6 +67,7 @@ fn app_root() -> Html {
         <AuthProvider>
             <BrowserRouter>
                 <Header />
+                <Navbar />
                 <main style="padding-bottom: 4em;">
                     <Switch<Route> render={switch} />
                 </main>
