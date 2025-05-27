@@ -1,7 +1,10 @@
+use itertools::Itertools;
 use yew::prelude::*;
 use gloo_net::http::Request;
 use crate::context::auth::use_auth;
 use crate::types::{Expense, ExpenseCategory};
+use chrono::Datelike;
+
 
 #[function_component(ExpenseDashboard)]
 pub fn expense_dashboard() -> Html {
@@ -47,6 +50,17 @@ pub fn expense_dashboard() -> Html {
         for expense in expenses.iter() {
             let amount = expense.amount.to_string().parse::<f64>().unwrap_or(0.0);
             *totals.entry(expense.category).or_insert(0.0) += amount;
+        }
+        totals
+    };
+
+    // Group expenses by month
+    let monthly_totals: std::collections::HashMap<String, f64> = {
+        let mut totals = std::collections::HashMap::new();
+        for expense in expenses.iter() {
+            let amount = expense.amount.to_string().parse::<f64>().unwrap_or(0.0);
+            let month_key = format!("{:04}-{:02}", expense.expense_date.year(), expense.expense_date.month());
+            *totals.entry(month_key).or_insert(0.0) += amount;
         }
         totals
     };
@@ -103,7 +117,7 @@ pub fn expense_dashboard() -> Html {
 
             // Category breakdown
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="card">
                         <div class="card-header">
                             <h5>{ "Répartition par catégorie" }</h5>
@@ -146,7 +160,54 @@ pub fn expense_dashboard() -> Html {
                     </div>
                 </div>
                 
-                <div class="col-md-6">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>{ "Répartition par mois" }</h5>
+                        </div>
+                        <div class="card-body">
+                            {
+                                if monthly_totals.is_empty() {
+                                    html! { <span>{ "Aucune dépense enregistrée." }</span> }
+                                } else {
+                                    let mut sorted_months: Vec<_> = monthly_totals.iter().collect();
+                                    sorted_months.sort_by(|a, b| b.0.cmp(a.0));
+                                    html! {
+                                        <ul class="list-group">
+                                            {
+                                                for sorted_months.iter().map(|(month, total)| {
+                                                    let month_name = match month.split('-').nth(1).unwrap_or("00") {
+                                                        "01" => "Janvier",
+                                                        "02" => "Février", 
+                                                        "03" => "Mars",
+                                                        "04" => "Avril",
+                                                        "05" => "Mai",
+                                                        "06" => "Juin",
+                                                        "07" => "Juillet",
+                                                        "08" => "Août",
+                                                        "09" => "Septembre",
+                                                        "10" => "Octobre",
+                                                        "11" => "Novembre",
+                                                        "12" => "Décembre",
+                                                        _ => "Inconnu"
+                                                    };
+                                                    let year = month.split('-').nth(0).unwrap_or("0000");
+                                                    html! {
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                            { format!("{} {}", month_name, year) }
+                                                            <span class="badge bg-primary rounded-pill">{ format!("{:.2} €", total) }</span>
+                                                        </li>
+                                                    }
+                                                })
+                                            }
+                                        </ul>
+                                    }
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
                     <div class="card">
                         <div class="card-header">
                             <h5>{ "Dépenses récentes" }</h5>
@@ -154,7 +215,7 @@ pub fn expense_dashboard() -> Html {
                         <div class="card-body">
                             <div class="list-group list-group-flush" style="max-height: 300px; overflow-y: auto;">
                                 {
-                                        for expenses.iter().take(5).map(|expense| {
+                                        for expenses.iter().sorted_by(|a, b| b.expense_date.cmp(&a.expense_date)).take(5).map(|expense| {
                                             html! {
                                                 <div class="list-group-item d-flex justify-content-between align-items-center">
                                                     <div>

@@ -106,17 +106,9 @@ pub fn navbar() -> Html {
                                     </button>
                                 </>
                             }
-                        } else {
-                            console::log_1(&"User is not authenticated for NavBar".into());
+                        } 
+                        else {
                             html! {
-                                <>
-                                    <Link<Route> to={Route::Login} classes="nav-link text-danger mx-2">
-                                        <i class="bi bi-box-arrow-in-right"></i>{ " Connexion" }
-                                    </Link<Route>>
-                                    <Link<Route> to={Route::Register} classes="nav-link text-black mx-2">
-                                        <i class="bi bi-person-plus"></i>{ " Inscription" }
-                                    </Link<Route>>
-                                </>
                             }
                         }
                     }

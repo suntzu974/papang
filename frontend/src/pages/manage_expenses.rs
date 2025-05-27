@@ -16,6 +16,7 @@ pub fn manage_expenses() -> Html {
     let show_edit_modal = use_state(|| false);
     let edit_expense = use_state(|| None::<Expense>);
     let selected_category = use_state(|| None::<ExpenseCategory>);
+    let confirm_delete_id = use_state(|| None::<i32>);
 
     // Redirect if not logged in
     if auth.token.is_none() {
@@ -51,39 +52,57 @@ pub fn manage_expenses() -> Html {
         );
     }
 
-    // Delete expense
+    // Delete expense (trigger confirmation modal)
     let on_delete = {
+        let confirm_delete_id = confirm_delete_id.clone();
+        Callback::from(move |id: i32| {
+            confirm_delete_id.set(Some(id));
+        })
+    };
+
+    // Confirm delete handlers
+    let on_confirm_delete = {
         let expenses = expenses.clone();
         let auth = auth.clone();
-        Callback::from(move |id: i32| {
-            let expenses = expenses.clone();
-            let auth = auth.clone();
-            wasm_bindgen_futures::spawn_local(async move {
-                if let Some(token) = &auth.access_token {
-                    let url = format!("http://localhost:3001/expenses/{}", id);
-                    let res = Request::delete(&url)
-                        .header("Authorization", &format!("Bearer {}", token))
-                        .send()
-                        .await;
-                    if let Ok(resp) = res {
-                        if resp.status() == 204 {
-                            // Refresh list
-                            let res = Request::get("http://localhost:3001/expenses")
-                                .header("Authorization", &format!("Bearer {}", token))
-                                .send()
-                                .await;
-                            if let Ok(resp) = res {
-                                if resp.status() == 200 {
-                                    if let Ok(list) = resp.json::<Vec<Expense>>().await {
-                                        expenses.set(list);
+        let confirm_delete_id = confirm_delete_id.clone();
+        Callback::from(move |_| {
+            if let Some(id) = *confirm_delete_id {
+                let expenses = expenses.clone();
+                let auth = auth.clone();
+                let confirm_delete_id = confirm_delete_id.clone();
+                wasm_bindgen_futures::spawn_local(async move {
+                    if let Some(token) = &auth.access_token {
+                        let url = format!("http://localhost:3001/expenses/{}", id);
+                        let res = Request::delete(&url)
+                            .header("Authorization", &format!("Bearer {}", token))
+                            .send()
+                            .await;
+                        if let Ok(resp) = res {
+                            if resp.status() == 204 {
+                                // Refresh list
+                                let res = Request::get("http://localhost:3001/expenses")
+                                    .header("Authorization", &format!("Bearer {}", token))
+                                    .send()
+                                    .await;
+                                if let Ok(resp) = res {
+                                    if resp.status() == 200 {
+                                        if let Ok(list) = resp.json::<Vec<Expense>>().await {
+                                            expenses.set(list);
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                }
-            });
+                    confirm_delete_id.set(None);
+                });
+            }
         })
+    };
+
+    let on_cancel_delete = {
+        let confirm_delete_id = confirm_delete_id.clone();
+        Callback::from(move |_| confirm_delete_id.set(None))
     };
 
     // Update expense
@@ -221,6 +240,38 @@ pub fn manage_expenses() -> Html {
                 on_close={on_edit_close}
                 on_update={on_edit_update}
             />
+
+            // Bootstrap confirmation modal
+            {
+                if let Some(_id) = *confirm_delete_id {
+                    html! {
+                        <div class="modal fade show" tabindex="-1" style="display: block; background: rgba(0,0,0,0.5);" aria-modal="true" role="dialog">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">{ "Confirmation de suppression" }</h5>
+                                        <button type="button" class="btn-close" onclick={on_cancel_delete.clone()}></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>{ "Voulez-vous vraiment supprimer cette dépense ?" }</p>
+                                        <p class="text-muted">{ "Cette action est irréversible." }</p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" onclick={on_cancel_delete}>
+                                            { "Annuler" }
+                                        </button>
+                                        <button type="button" class="btn btn-danger" onclick={on_confirm_delete}>
+                                            <i class="bi bi-trash"></i>{ " Supprimer" }
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                } else {
+                    html! {}
+                }
+            }
         </>
     }
 }
