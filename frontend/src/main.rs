@@ -16,6 +16,10 @@ use pages::{
 };
 use context::auth::AuthProvider;
 use crate::components::layout::Navbar;
+use crate::pages::{
+    manage_expenses::ManageExpenses,
+    add_expense::AddExpense,
+};
 
 #[derive(Clone, Routable, PartialEq)]
 enum Route {
@@ -29,6 +33,10 @@ enum Route {
     Profile,
     #[at("/logout")]
     Logout,
+    #[at("/expenses/add")]
+    AddExpense,
+    #[at("/expenses/manage")]
+    ManageExpenses,
 }
 
 fn switch(routes: Route) -> Html {
@@ -39,6 +47,8 @@ fn switch(routes: Route) -> Html {
 
         Route::Profile => html! { <Profile /> },
         Route::Logout => html! { <LogoutPage /> },
+        Route::AddExpense => html! { <AddExpense /> },
+        Route::ManageExpenses => html! { <ManageExpenses /> }, 
     }
 }
 

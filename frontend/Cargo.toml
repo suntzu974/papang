@@ -10,6 +10,7 @@ path = "src/main.rs"
 [dependencies]
 bigdecimal = { version = "0.4.8", features = ["serde"] }
 chrono = { version = "0.4.41", features = ["serde"] }
+gloo = "0.11.0"
 gloo-net = "0.6.0"
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"

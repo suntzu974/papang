@@ -2,6 +2,7 @@ use yew::prelude::*;
 use crate::context::auth::use_auth;
 use crate::pages::auth::LoginComponent;
 use crate::pages::expenses::ExpenseComponent;
+use crate::pages::home::ExpenseDashboard;
 
 #[function_component(Main)]
 pub fn main_component() -> Html {
@@ -9,7 +10,7 @@ pub fn main_component() -> Html {
 
     html! {
         if auth.access_token.is_some() {
-            <ExpenseComponent /> 
+            <ExpenseDashboard /> 
         } else {
             <LoginComponent /> 
         }

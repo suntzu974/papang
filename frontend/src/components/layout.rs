@@ -14,6 +14,10 @@ pub enum Route {
     Register,
     #[at("/expenses")]
     Expenses,
+    #[at("/expenses/add")]
+    AddExpense,
+    #[at("/expenses/manage")]
+    ManageExpenses,
     #[at("/profile")]
     Profile,
     #[at("/logout")]
@@ -84,7 +88,13 @@ pub fn navbar() -> Html {
                             html! {
                                 <>
                                     <Link<Route> to={Route::Home} classes="nav-link text-black mx-2">
-                                        <i class="bi bi-list-ul"></i>{ " Dépenses" }
+                                        <i class="bi bi-house"></i>{ " Accueil" }
+                                    </Link<Route>>
+                                    <Link<Route> to={Route::AddExpense} classes="nav-link text-black mx-2">
+                                        <i class="bi bi-plus-circle"></i>{ " Ajouter" }
+                                    </Link<Route>>
+                                    <Link<Route> to={Route::ManageExpenses} classes="nav-link text-black mx-2">
+                                        <i class="bi bi-list-ul"></i>{ " Gérer" }
                                     </Link<Route>>
                                     <Link<Route> to={Route::Profile} classes="nav-link text-black mx-2">
                                         <i class="bi bi-person"></i>{ " Profil" }

@@ -1,7 +1,10 @@
 pub mod main;
+pub mod auth;
+pub mod home;
+pub mod expenses;
+pub mod expenses_list;
+pub mod add_expense;
+pub mod manage_expenses;
+pub mod profile;
 pub mod login;
 pub mod register;
-pub mod expenses;
-pub mod profile;
-pub mod auth;
-pub mod expenses_list;

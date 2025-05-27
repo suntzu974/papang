@@ -28,7 +28,7 @@ pub struct RegisterResponse {
     pub refresh_token: String,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ExpenseCategory {
     Groceries,
     Leisure,
