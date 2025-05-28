@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use fred::prelude::Client as RedisClient;
+use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 use sqlx::PgPool;
 
 use crate::{
@@ -14,6 +15,7 @@ use crate::{
         },
     },
     config::Config,
+    email::EmailService,
     expense::repository::ExpenseRepository,
     user::repository::UserRepositoryImpl,
 };
@@ -24,6 +26,7 @@ pub struct AppState {
     pub refresh_token_service: RefreshTokenServiceImpl<RedisRefreshTokenRepository>,
     pub password_service: PasswordServiceImpl,
     pub expense_repository: ExpenseRepository,
+    pub email_service: EmailService,
 }
 
 impl AppState {
@@ -35,6 +38,11 @@ impl AppState {
             RefreshTokenServiceImpl::new(refresh_token_repo, config.refresh_secret());
         let password_service = PasswordServiceImpl::new();
         let expense_repository = ExpenseRepository::new(db.clone());
+        let email_service = EmailService::new(
+            config.smtp_username().to_string(),
+            config.smtp_password().to_string(),
+            config.from_email().to_string(),
+        );
 
         Self {
             user_repository,
@@ -42,6 +50,7 @@ impl AppState {
             refresh_token_service,
             password_service,
             expense_repository,
+            email_service,
         }
     }
 }

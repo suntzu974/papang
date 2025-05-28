@@ -8,6 +8,9 @@ pub struct EnvConfig {
     access_secret: Cow<'static, str>,
     refresh_secret: Cow<'static, str>,
     redis_url: Cow<'static, str>,
+    smtp_username: Cow<'static, str>,
+    smtp_password: Cow<'static, str>,
+    from_email: Cow<'static, str>,
     port: u16,
 }
 
@@ -19,6 +22,9 @@ impl EnvConfig {
             access_secret: provider.get("ACCESS_SECRET")?,
             refresh_secret: provider.get("REFRESH_SECRET")?,
             redis_url: provider.get("REDIS_URL")?,
+            smtp_username: provider.get("SMTP_USERNAME")?,
+            smtp_password: provider.get("SMTP_PASSWORD")?,
+            from_email: provider.get("FROM_EMAIL")?,
             port: provider
                 .get("PORT")?
                 .parse::<u16>()
@@ -50,5 +56,17 @@ impl Config for EnvConfig {
 
     fn port(&self) -> u16 {
         self.port
+    }
+
+    fn smtp_username(&self) -> &str {
+        &self.smtp_username
+    }
+
+    fn smtp_password(&self) -> &str {
+        &self.smtp_password
+    }
+
+    fn from_email(&self) -> &str {
+        &self.from_email
     }
 }

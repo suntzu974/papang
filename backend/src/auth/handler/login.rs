@@ -38,7 +38,7 @@ pub async fn login_handler(
         .ok_or(AppError::BadRequest("User does not exit".into()))?;
 
     // Check if email is verified
-    if !user.email_verified {
+    if user.email_verified != Some(true) {
         return Err(AppError::Unauthorized(
             "Email not verified. Please check your email to verify your account.".into(),
         ));

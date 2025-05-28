@@ -5,6 +5,7 @@ use axum::{Json, extract::State, http::StatusCode};
 use serde::Deserialize;
 use validator::Validate;
 use serde_json::json; // Import json macro
+use anyhow::anyhow;
 
 use crate::{
     auth::{
@@ -55,11 +56,18 @@ pub async fn register_handler(
         })
         .await?;
 
-    // TODO: Implement actual email sending logic here
-    // For now, we'll just log it or assume it's sent.
-    // Example: state.email_service.send_verification_email(&payload.email, &verification_token).await?;
-    println!("Verification email for {}: token = {}", payload.email, verification_token);
+    // Send verification email
+    if let Err(e) = state.email_service
+        .send_verification_email(&payload.email, &verification_token)
+        .await
+    {
+        tracing::error!("Failed to send verification email: {}", e);
 
+return Err(AppError::InternalServerError(
+    anyhow!("Failed to send verification email")
+));
+
+    }
 
     Ok((StatusCode::CREATED, Json(json!({
         "message": "Registration successful. Please check your email to verify your account.",

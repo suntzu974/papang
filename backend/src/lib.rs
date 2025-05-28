@@ -8,3 +8,4 @@ pub mod server;
 mod state;
 mod user;
 mod validation;
+pub mod email;
