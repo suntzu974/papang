@@ -4,7 +4,7 @@ use web_sys::HtmlInputElement;
 use yew::prelude::*;
 use yew::TargetCast;
 use yew_router::prelude::*;
-use crate::{context::auth::{use_auth, User}, Route};
+use crate::{context::auth::{use_auth, check_auth_response}, Route};
 
 #[derive(Serialize)]
 struct UpdateNamePayload {
@@ -72,19 +72,16 @@ pub fn profile() -> Html {
 
                     match res {
                         Ok(resp) => {
-                            if resp.status() == 200 {
-                                if let Ok(updated_user) = resp.json::<User>().await {
-                                    auth.set_user.emit(Some(updated_user));
-                                    response_message.set("Nom mis à jour avec succès".to_string());
+                            if check_auth_response(resp.status(), &auth) {
+                                if resp.status() == 200 {
+                                    response_message.set("Nom mis à jour !".to_string());
                                     is_editing.set(false);
+                                } else {
+                                    response_message.set("Erreur lors de la mise à jour".to_string());
                                 }
-                            } else {
-                                response_message.set("Erreur lors de la mise à jour".to_string());
                             }
                         }
-                        Err(_) => {
-                            response_message.set("Erreur de connexion".to_string());
-                        }
+                        Err(_) => response_message.set("Erreur réseau".to_string()),
                     }
                 }
             });

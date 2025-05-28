@@ -2,7 +2,7 @@ use yew::prelude::*;
 use gloo_net::http::Request;
 use web_sys::{HtmlInputElement, console};
 use yew::TargetCast;
-use crate::context::auth::use_auth;
+use crate::context::auth::{use_auth, check_auth_response};
 use crate::types::{Expense, ExpenseCategory};
 
 #[derive(Properties, PartialEq)]
@@ -85,19 +85,14 @@ pub fn edit_expense_modal(props: &EditExpenseModalProps) -> Html {
 
                         match res {
                             Ok(resp) => {
-                                console::log_1(&format!("Response status: {}", resp.status()).into());
-                                if resp.status() == 200 {
-                                    response_message.set("Dépense modifiée avec succès".to_string());
-                                    on_update.emit(());
-                                    on_close.emit(());
-                                } else {
-                                    response_message.set("Erreur lors de la modification".to_string());
+                                if check_auth_response(resp.status(), &auth) {
+                                    if resp.status() == 200 {
+                                        on_update.emit(());
+                                        on_close.emit(());
+                                    }
                                 }
                             }
-                            Err(e) => {
-                                console::log_1(&format!("Request error: {:?}", e).into());
-                                response_message.set("Erreur réseau".to_string());
-                            }
+                            Err(_) => {},
                         }
                     } else {
                         console::log_1(&"No access_token found".into());

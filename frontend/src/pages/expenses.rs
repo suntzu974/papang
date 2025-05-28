@@ -3,7 +3,7 @@ use gloo_net::http::Request;
 use web_sys::HtmlInputElement;
 use yew::TargetCast;
 use serde::Serialize;
-use crate::context::auth::use_auth;
+use crate::context::auth::{use_auth, check_auth_response};
 use crate::types::{Expense, ExpenseCategory};
 use crate::components::expense_edit::EditExpenseModal;
 use yew_router::prelude::*;
@@ -31,19 +31,21 @@ pub fn expense_component() -> Html {
     {
         let expenses = expenses.clone();
         let access_token = auth.access_token.clone();
+        let auth_for_effect = auth.clone();
         use_effect_with(
             access_token.clone(),
             move |access_token| {
                 let token_opt = access_token.clone();
                 if let Some(token) = token_opt {
                     let expenses = expenses.clone();
+                    let auth = auth_for_effect.clone();
                     wasm_bindgen_futures::spawn_local(async move {
                         let res = Request::get("http://localhost:3001/expenses")
                             .header("Authorization", &format!("Bearer {}", token))
                             .send()
                             .await;
                         if let Ok(resp) = res {
-                            if resp.status() == 200 {
+                            if check_auth_response(resp.status(), &auth) && resp.status() == 200 {
                                 if let Ok(list) = resp.json::<Vec<Expense>>().await {
                                     expenses.set(list);
                                 }
@@ -96,29 +98,31 @@ pub fn expense_component() -> Html {
                         .await;
                     match res {
                         Ok(resp) => {
-                            if resp.status() == 201 {
-                                response_message.set("DÃ©pense ajoutÃ©e".to_string());
-                                // Clear the form
-                                description.set("".to_string());
-                                amount.set("".to_string());
-                                category.set(ExpenseCategory::Others);
-                                // Refresh list
-                                let res = Request::get("http://localhost:3001/expenses")
-                                    .header("Authorization", &format!("Bearer {}", token))
-                                    .send()
-                                    .await;
-                                if let Ok(resp) = res {
-                                    if resp.status() == 200 {
-                                        if let Ok(list) = resp.json::<Vec<Expense>>().await {
-                                            expenses.set(list);
+                            if check_auth_response(resp.status(), &auth) {
+                                if resp.status() == 201 {
+                                    response_message.set("Dépense ajoutée".to_string());
+                                    // Clear the form
+                                    description.set("".to_string());
+                                    amount.set("".to_string());
+                                    category.set(ExpenseCategory::Others);
+                                    // Refresh list
+                                    let res = Request::get("http://localhost:3001/expenses")
+                                        .header("Authorization", &format!("Bearer {}", token))
+                                        .send()
+                                        .await;
+                                    if let Ok(resp) = res {
+                                        if resp.status() == 200 {
+                                            if let Ok(list) = resp.json::<Vec<Expense>>().await {
+                                                expenses.set(list);
+                                            }
                                         }
                                     }
+                                } else {
+                                    response_message.set("Erreur lors de l'ajout".to_string());
                                 }
-                            } else {
-                                response_message.set("Erreur lors de l'ajout".to_string());
                             }
                         }
-                        Err(_) => response_message.set("Erreur rÃ©seau".to_string()),
+                        Err(_) => response_message.set("Erreur réseau".to_string()),
                     }
                 }
             });
@@ -143,25 +147,27 @@ pub fn expense_component() -> Html {
                         .await;
                     match res {
                         Ok(resp) => {
-                            if resp.status() == 204 {
-                                response_message.set("DÃ©pense supprimÃ©e".to_string());
-                                // Refresh list
-                                let res = Request::get("http://localhost:3001/expenses")
-                                    .header("Authorization", &format!("Bearer {}", token))
-                                    .send()
-                                    .await;
-                                if let Ok(resp) = res {
-                                    if resp.status() == 200 {
-                                        if let Ok(list) = resp.json::<Vec<Expense>>().await {
-                                            expenses.set(list);
+                            if check_auth_response(resp.status(), &auth) {
+                                if resp.status() == 204 {
+                                    response_message.set("Dépense supprimée".to_string());
+                                    // Refresh list
+                                    let res = Request::get("http://localhost:3001/expenses")
+                                        .header("Authorization", &format!("Bearer {}", token))
+                                        .send()
+                                        .await;
+                                    if let Ok(resp) = res {
+                                        if resp.status() == 200 {
+                                            if let Ok(list) = resp.json::<Vec<Expense>>().await {
+                                                expenses.set(list);
+                                            }
                                         }
                                     }
+                                } else {
+                                    response_message.set("Erreur lors de la suppression".to_string());
                                 }
-                            } else {
-                                response_message.set("Erreur lors de la suppression".to_string());
                             }
                         }
-                        Err(_) => response_message.set("Erreur rÃ©seau".to_string()),
+                        Err(_) => response_message.set("Erreur réseau".to_string()),
                     }
                 }
             });

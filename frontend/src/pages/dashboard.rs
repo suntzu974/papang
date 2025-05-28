@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use yew::prelude::*;
 use gloo_net::http::Request;
-use crate::context::auth::use_auth;
+use crate::context::auth::{use_auth, check_auth_response};
 use crate::types::{Expense, ExpenseCategory};
 use chrono::Datelike;
 
@@ -15,19 +15,21 @@ pub fn expense_dashboard() -> Html {
     {
         let expenses = expenses.clone();
         let access_token = auth.access_token.clone();
+        let auth_for_effect = auth.clone();
         use_effect_with(
             access_token.clone(),
             move |access_token| {
                 if let Some(token) = access_token {
                     let expenses = expenses.clone();
                     let token = token.clone();
+                    let auth = auth_for_effect.clone();
                     wasm_bindgen_futures::spawn_local(async move {
                         let res = Request::get("http://localhost:3001/expenses")
                             .header("Authorization", &format!("Bearer {}", token))
                             .send()
                             .await;
                         if let Ok(resp) = res {
-                            if resp.status() == 200 {
+                            if check_auth_response(resp.status(), &auth) && resp.status() == 200 {
                                 if let Ok(list) = resp.json::<Vec<Expense>>().await {
                                     expenses.set(list);
                                 }
