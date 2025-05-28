@@ -37,6 +37,13 @@ pub async fn login_handler(
         .await?
         .ok_or(AppError::BadRequest("User does not exit".into()))?;
 
+    // Check if email is verified
+    if !user.email_verified {
+        return Err(AppError::Unauthorized(
+            "Email not verified. Please check your email to verify your account.".into(),
+        ));
+    }
+
     if !state
         .password_service
         .verify_password(&payload.password, &user.password_hash)

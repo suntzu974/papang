@@ -3,6 +3,8 @@ CREATE TABLE IF NOT EXISTS users (
 	name VARCHAR(50) NOT NULL,
 	email VARCHAR(50) UNIQUE NOT NULL,
 	password_hash TEXT NOT NULL,
+	email_verified BOOLEAN DEFAULT FALSE, -- Add this line
+	verification_token TEXT, -- Add this line
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
- 
+

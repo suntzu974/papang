@@ -8,5 +8,7 @@ pub struct User {
     pub name: String,
     pub email: String,
     pub password_hash: String,
+    pub email_verified: bool,          // Add this line
+    pub verification_token: Option<String>, // Add this line
     pub created_at: Option<NaiveDateTime>,
 }
