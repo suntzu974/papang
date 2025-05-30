@@ -184,50 +184,57 @@ pub fn manage_expenses() -> Html {
 
     html! {
         <>
-            <div class="container mt-4">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h2>{ "Gestion des dépenses" }</h2>
+            <div class="container-fluid">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-lg-10 col-xl-8">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4">
+                            <h2 class="mb-3 mb-md-0">{ "Gestion des dépenses" }</h2>
                             <Link<Route> to={Route::AddExpense} classes="btn btn-primary">
                                 <i class="bi bi-plus-circle"></i>{ " Ajouter une dépense" }
                             </Link<Route>>
                         </div>
                         
-                        <div class="card">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0">{ format!("Mes dépenses ({} au total)", filtered_expenses.len()) }</h5>
-                                <div class="d-flex align-items-center">
-                                    <label class="form-label me-2 mb-0">{ "Filtrer par catégorie:" }</label>
-                                    <select 
-                                        class="form-select form-select-sm" 
-                                        style="width: auto;"
-                                        onchange={on_category_filter}
-                                        value={
-                                            if let Some(cat) = *selected_category {
-                                                format!("{:?}", cat)
-                                            } else {
-                                                "all".to_string()
-                                            }
-                                        }
-                                    >
-                                        <option value="all">{ "Toutes les catégories" }</option>
-                                        <option value="Groceries">{ "Alimentation" }</option>
-                                        <option value="Leisure">{ "Loisirs" }</option>
-                                        <option value="Electronics">{ "Électronique" }</option>
-                                        <option value="Utilities">{ "Factures" }</option>
-                                        <option value="Clothing">{ "Vêtements" }</option>
-                                        <option value="Health">{ "Santé" }</option>
-                                        <option value="Others">{ "Autres" }</option>
-                                    </select>
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-primary text-white">
+                                <div class="row align-items-center">
+                                    <div class="col-12 col-md-6">
+                                        <h5 class="mb-2 mb-md-0">{ format!("Mes dépenses ({} au total)", filtered_expenses.len()) }</h5>
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <div class="d-flex flex-column flex-sm-row align-items-sm-center">
+                                            <label class="form-label text-white me-2 mb-2 mb-sm-0 small">{ "Filtrer:" }</label>
+                                            <select 
+                                                class="form-select form-select-sm" 
+                                                onchange={on_category_filter}
+                                                value={
+                                                    if let Some(cat) = *selected_category {
+                                                        format!("{:?}", cat)
+                                                    } else {
+                                                        "all".to_string()
+                                                    }
+                                                }
+                                            >
+                                                <option value="all">{ "Toutes" }</option>
+                                                <option value="Groceries">{ "Alimentation" }</option>
+                                                <option value="Leisure">{ "Loisirs" }</option>
+                                                <option value="Electronics">{ "Électronique" }</option>
+                                                <option value="Utilities">{ "Factures" }</option>
+                                                <option value="Clothing">{ "Vêtements" }</option>
+                                                <option value="Health">{ "Santé" }</option>
+                                                <option value="Others">{ "Autres" }</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="card-body">
-                                <ExpenseListComponent
-                                    expenses={filtered_expenses}
-                                    on_update_click={on_update_click.clone()}
-                                    on_delete={on_delete.clone()}
-                                />
+                            <div class="card-body p-2 p-md-3">
+                                <div class="table-responsive">
+                                    <ExpenseListComponent
+                                        expenses={filtered_expenses}
+                                        on_update_click={on_update_click.clone()}
+                                        on_delete={on_delete.clone()}
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>

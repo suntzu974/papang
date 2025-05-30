@@ -78,40 +78,47 @@ pub fn navbar() -> Html {
     };
     
     html! {
-        <nav class="navbar navbar-expand-lg navbar-dark">
-            <div class="container-fluid justify-content-center">
-                <div class="navbar-nav">
-                    {
-                        if auth.access_token.is_some() {
-                            console::log_1(&"User is authenticated in NavBar".into());
-                            html! {
-                                <>
-                                    <Link<Route> to={Route::Home} classes="nav-link text-black mx-2">
-                                        <i class="bi bi-house"></i>{ " Accueil" }
-                                    </Link<Route>>
-                                    <Link<Route> to={Route::AddExpense} classes="nav-link text-black mx-2">
-                                        <i class="bi bi-plus-circle"></i>{ " Ajouter" }
-                                    </Link<Route>>
-                                    <Link<Route> to={Route::ManageExpenses} classes="nav-link text-black mx-2">
-                                        <i class="bi bi-list-ul"></i>{ " Gérer" }
-                                    </Link<Route>>
-                                    <Link<Route> to={Route::Profile} classes="nav-link text-black mx-2">
-                                        <i class="bi bi-person"></i>{ " Profil" }
-                                    </Link<Route>>
-                                    <button 
-                                        class="btn  btn-sm mx-2 color-secondary"
-                                        onclick={on_logout}
-                                    >
-                                        <i class="bi bi-box-arrow-right"></i>{ " Déconnexion" }
-                                    </button>
-                                </>
-                            }
-                        } 
-                        else {
-                            html! {
+        <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+            <div class="container-fluid">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+                    <div class="navbar-nav">
+                        {
+                            if auth.access_token.is_some() {
+                                html! {
+                                    <>
+                                        <Link<Route> to={Route::Home} classes="nav-link text-dark mx-1 mx-lg-2">
+                                            <i class="bi bi-house"></i>
+                                            <span class="d-lg-inline ms-1">{ " Accueil" }</span>
+                                        </Link<Route>>
+                                        <Link<Route> to={Route::AddExpense} classes="nav-link text-dark mx-1 mx-lg-2">
+                                            <i class="bi bi-plus-circle"></i>
+                                            <span class="d-lg-inline ms-1">{ " Ajouter" }</span>
+                                        </Link<Route>>
+                                        <Link<Route> to={Route::ManageExpenses} classes="nav-link text-dark mx-1 mx-lg-2">
+                                            <i class="bi bi-list-ul"></i>
+                                            <span class="d-lg-inline ms-1">{ " Gérer" }</span>
+                                        </Link<Route>>
+                                        <Link<Route> to={Route::Profile} classes="nav-link text-dark mx-1 mx-lg-2">
+                                            <i class="bi bi-person"></i>
+                                            <span class="d-lg-inline ms-1">{ " Profil" }</span>
+                                        </Link<Route>>
+                                        <button 
+                                            class="btn btn-outline-secondary btn-sm mx-1 mx-lg-2"
+                                            onclick={on_logout}
+                                        >
+                                            <i class="bi bi-box-arrow-right"></i>
+                                            <span class="d-lg-inline ms-1">{ " Déconnexion" }</span>
+                                        </button>
+                                    </>
+                                }
+                            } else {
+                                html! {}
                             }
                         }
-                    }
+                    </div>
                 </div>
             </div>
         </nav>
@@ -121,9 +128,13 @@ pub fn navbar() -> Html {
 #[function_component(Footer)]
 pub fn footer() -> Html {
     html! {
-        <footer class="footer py-3 bg-dark fixed-bottom">
-            <div class="container text-center">
-                <span class="text-white-50">{ "© 2024 Papang - Gestion des Dépenses" }</span>
+        <footer class="footer mt-auto py-3 bg-dark">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <span class="text-white-50 small">{ "© 2024 Papang - Gestion des Dépenses" }</span>
+                    </div>
+                </div>
             </div>
         </footer>
     }
