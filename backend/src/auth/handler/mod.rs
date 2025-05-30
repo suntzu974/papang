@@ -14,6 +14,7 @@ use resend_verification::resend_verification_handler;
 use forgot_password::forgot_password_handler;
 use reset_password::reset_password_handler;
 use change_password::change_password_handler;
+use open_url::open_url_handler;
 
 use crate::state::AppState;
 
@@ -27,6 +28,7 @@ pub mod resend_verification;
 pub mod forgot_password;
 pub mod reset_password;
 pub mod change_password;
+pub mod open_url;
 
 pub fn router() -> Router<Arc<AppState>> {
     return Router::new()
@@ -40,5 +42,6 @@ pub fn router() -> Router<Arc<AppState>> {
         .route("/auth/resend-verification", post(resend_verification_handler))
         .route("/auth/forgot-password", post(forgot_password_handler))
         .route("/auth/reset-password", post(reset_password_handler))
-        .route("/auth/change-password", put(change_password_handler));
+        .route("/auth/change-password", put(change_password_handler))
+        .route("/auth/open-url", post(open_url_handler));
 }

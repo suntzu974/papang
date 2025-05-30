@@ -5,7 +5,7 @@ mod components;
 mod pages;
 mod context;
 mod types;
-
+mod services;
 use components::layout::{Header, Footer};
 use pages::{
     main::Main,

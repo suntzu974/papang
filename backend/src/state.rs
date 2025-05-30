@@ -1,4 +1,9 @@
 use std::sync::Arc;
+use dashmap::DashMap;
+use once_cell::sync::Lazy;
+use parking_lot::RwLock;
+use ahash::AHasher;
+use std::hash::BuildHasherDefault;
 
 use fred::prelude::Client as RedisClient;
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
@@ -20,6 +25,10 @@ use crate::{
     user::repository::UserRepositoryImpl,
 };
 
+// Global cache for frequently accessed data
+static GLOBAL_CACHE: Lazy<DashMap<String, String, BuildHasherDefault<AHasher>>> = 
+    Lazy::new(|| DashMap::with_hasher(BuildHasherDefault::default()));
+
 pub struct AppState {
     pub user_repository: UserRepositoryImpl,
     pub access_token_service: AccessTokenServiceImpl,
@@ -27,12 +36,26 @@ pub struct AppState {
     pub password_service: PasswordServiceImpl,
     pub expense_repository: ExpenseRepository,
     pub email_service: EmailService,
+    // Use RwLock for better read performance when writes are infrequent
+    pub config_cache: Arc<RwLock<DashMap<String, String, BuildHasherDefault<AHasher>>>>,
+    // Connection pools are already optimized
+    pub db_pool: sqlx::PgPool,
+    pub redis_client: fred::prelude::Client,
 }
 
 impl AppState {
     pub fn new<C: Config>(db: Arc<PgPool>, redis_client: Arc<RedisClient>, config: &C) -> Self {
+        let config_cache = Arc::new(RwLock::new(DashMap::with_hasher(BuildHasherDefault::default())));
+        
+        // Pre-populate config cache with frequently accessed values
+        {
+            let mut cache = config_cache.write();
+            cache.insert("jwt_secret".to_string(), config.jwt_secret().to_string());
+            cache.insert("frontend_url".to_string(), config.frontend_url().to_string());
+        }
+
         let user_repository = UserRepositoryImpl::new(db.clone());
-        let refresh_token_repo = RedisRefreshTokenRepository::new(redis_client);
+        let refresh_token_repo = RedisRefreshTokenRepository::new(redis_client.clone());
         let access_token_service = AccessTokenServiceImpl::new(config.access_secret());
         let refresh_token_service =
             RefreshTokenServiceImpl::new(refresh_token_repo, config.refresh_secret());
@@ -51,6 +74,17 @@ impl AppState {
             password_service,
             expense_repository,
             email_service,
+            config_cache,
+            db_pool: (*db).clone(),
+            redis_client: (*redis_client).clone(),
         }
+    }
+
+    pub fn get_cached_config(&self, key: &str) -> Option<String> {
+        self.config_cache.read().get(key).map(|v| v.clone())
+    }
+
+    pub fn set_cached_config(&self, key: String, value: String) {
+        self.config_cache.write().insert(key, value);
     }
 }

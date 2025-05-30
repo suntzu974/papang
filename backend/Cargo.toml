@@ -9,6 +9,7 @@ argon2 = "0.5.3"
 async-trait = "0.1.87"
 axum = { version = "0.8.1", features = ["macros"] }
 axum-extra = { version = "0.10.0", features = ["typed-header"] }
+axum-server = { version = "0.6", features = ["tls-rustls"] }
 bigdecimal = { version = "0.4.7", features = ["serde"] }
 chrono = { version = "0.4.40", features = ["serde"] }
 dotenv = "0.15.0"
@@ -16,6 +17,8 @@ fred = "10.1.0"
 jsonwebtoken = "9.3.1"
 lettre = { version = "0.11.16", features = [ "tokio1", "tokio1-native-tls"] }
 ring = "0.17.14"
+rustls = "0.22"
+rustls-pemfile = "2.0"
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"
 sha2 = "0.10.8"
@@ -23,8 +26,54 @@ sqlx = { version = "0.8.3", features = ["runtime-tokio", "postgres", "chrono", "
 thiserror = "2.0.12"
 tokio = { version = "1.44.0", features = ["full"] }
 tower = { version = "0.5.2", features = ["tracing"] }
-tower-http = { version = "0.6.2", features = ["cors", "trace", "tracing"] }
+tower-http = { version = "0.6.2", features = ["cors", "trace", "tracing","compression-full", "timeout", "limit"] }
 tracing = "0.1.41"
 tracing-subscriber = "0.3.19"
 uuid = { version = "1.17.0", features = ["v4", "serde"] }
-validator = { version = "0.20.0", features = ["derive"] }  
+validator = { version = "0.20.0", features = ["derive"] }
+url = "2.5"
+
+# Performance and optimization dependencies
+mimalloc = { version = "0.1", default-features = false }
+dashmap = "6.1"
+once_cell = "1.20"
+rayon = "1.10"
+parking_lot = "0.12"
+ahash = "0.8"
+bytes = "1.8"
+tokio-util = { version = "0.7", features = ["rt"] }
+flate2 = "1.0"
+brotli = "7.0"
+
+[profile.release]
+# Enable Link Time Optimization for better performance
+lto = "fat"
+# Enable more aggressive optimizations
+opt-level = 3
+# Enable debug info for profiling in release builds
+debug = 1
+# Enable panic = abort for smaller binaries and better performance
+panic = "abort"
+# Reduce binary size
+strip = "symbols"
+# Enable CPU-specific optimizations
+codegen-units = 1
+
+[profile.dev]
+# Faster compilation in debug mode
+opt-level = 1
+# Reduce debug info for faster compilation
+debug = 1
+# Enable incremental compilation
+incremental = true
+
+[profile.bench]
+# Benchmark profile for performance testing
+inherits = "release"
+debug = true
+lto = "thin"
+
+[profile.test]
+# Optimize tests for faster execution
+opt-level = 2
+debug = 1
