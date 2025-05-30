@@ -7,6 +7,7 @@ use crate::pages::expenses_list::ExpenseListComponent;
 use crate::components::expense_edit::EditExpenseModal;
 use crate::components::layout::Route;
 use web_sys::{HtmlInputElement, console};
+use crate::services::api_service::ApiService;
 
 #[function_component(ManageExpenses)]
 pub fn manage_expenses() -> Html {
@@ -34,7 +35,7 @@ pub fn manage_expenses() -> Html {
                     let expenses = expenses.clone();
                     let token = token.clone();
                     wasm_bindgen_futures::spawn_local(async move {
-                        let res = Request::get("http://localhost:3001/expenses")
+                        let res = ApiService::get("/expenses")
                             .header("Authorization", &format!("Bearer {}", token))
                             .send()
                             .await;

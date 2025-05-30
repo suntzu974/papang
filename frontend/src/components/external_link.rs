@@ -1,5 +1,5 @@
 use yew::prelude::*;
-use crate::services::url_service::UrlService;
+ use crate::services::url_service::UrlService;
 use crate::context::auth::use_auth;
 
 #[derive(Properties, PartialEq)]

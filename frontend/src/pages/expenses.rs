@@ -9,6 +9,7 @@ use crate::components::expense_edit::EditExpenseModal;
 use yew_router::prelude::*;
 use crate::{Route};
 use crate::pages::expenses_list::ExpenseListComponent; // Ajout de l'import
+use crate::services::api_service::ApiService;
 
 #[function_component(ExpenseComponent)]
 pub fn expense_component() -> Html {
@@ -40,7 +41,7 @@ pub fn expense_component() -> Html {
                     let expenses = expenses.clone();
                     let auth = auth_for_effect.clone();
                     wasm_bindgen_futures::spawn_local(async move {
-                        let res = Request::get("http://localhost:3001/expenses")
+                        let res = ApiService::get("/expenses")
                             .header("Authorization", &format!("Bearer {}", token))
                             .send()
                             .await;

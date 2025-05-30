@@ -7,6 +7,7 @@ use serde::Serialize;
 use crate::context::auth::use_auth;
 use crate::types::ExpenseCategory;
 use crate::components::layout::Route;
+use crate::services::api_service::ApiService;
 
 #[derive(Serialize)]
 struct NewExpense<'a> {
@@ -53,7 +54,7 @@ pub fn add_expense() -> Html {
                         amount: &amount,
                         category: *category,
                     };
-                    let res = Request::post("http://localhost:3001/expenses")
+                    let res = ApiService::post("/expenses")
                         .header("Authorization", &format!("Bearer {}", token))
                         .header("Content-Type", "application/json")
                         .json(&new_expense)

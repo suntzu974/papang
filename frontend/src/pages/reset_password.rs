@@ -3,6 +3,7 @@ use gloo_net::http::Request;
 use web_sys::HtmlInputElement;
 use yew::TargetCast;
 use serde::Serialize;
+use crate::services::api_service::ApiService;
 
 #[derive(Serialize)]
 struct ResetPasswordForm {
@@ -59,7 +60,7 @@ pub fn reset_password_component(props: &ResetPasswordProps) -> Html {
                     new_password: (*new_password).clone(),
                 };
 
-                let res = Request::post("http://localhost:3001/auth/reset-password")
+                let res = ApiService::post("/auth/reset-password")
                     .header("Content-Type", "application/json")
                     .json(&reset_data)
                     .unwrap()

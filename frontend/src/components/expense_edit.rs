@@ -4,6 +4,7 @@ use web_sys::{HtmlInputElement, console};
 use yew::TargetCast;
 use crate::context::auth::{use_auth, check_auth_response};
 use crate::types::{Expense, ExpenseCategory};
+use crate::services::api_service::ApiService;
 
 #[derive(Properties, PartialEq)]
 pub struct EditExpenseModalProps {
@@ -74,8 +75,7 @@ pub fn edit_expense_modal(props: &EditExpenseModalProps) -> Html {
                             expense_date: chrono::Utc::now().naive_utc(),
                         };
 
-                        let url = "http://localhost:3001/expenses";
-                        let res = Request::put(&url)
+                        let res = ApiService::put("/expenses")
                             .header("Authorization", &format!("Bearer {}", token))
                             .header("Content-Type", "application/json")
                             .json(&updated_expense)

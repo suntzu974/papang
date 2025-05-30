@@ -3,6 +3,7 @@ use gloo_net::http::Request;
 use web_sys::HtmlInputElement;
 use yew::TargetCast;
 use serde::Serialize;
+use crate::services::api_service::ApiService;
 
 #[derive(Serialize)]
 struct ForgotPasswordForm {
@@ -38,7 +39,7 @@ pub fn forgot_password_component() -> Html {
                     email: (*email).clone(),
                 };
 
-                let res = Request::post("http://localhost:3001/auth/forgot-password")
+                let res = ApiService::post("/auth/forgot-password")
                     .header("Content-Type", "application/json")
                     .json(&forgot_password_data)
                     .unwrap()

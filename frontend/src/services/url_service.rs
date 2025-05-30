@@ -1,6 +1,7 @@
 use gloo_net::http::Request;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
+use crate::services::api_service::ApiService;
 
 #[derive(Serialize)]
 pub struct OpenUrlRequest {
@@ -28,7 +29,7 @@ impl UrlService {
             new_tab,
         };
 
-        let mut request = Request::post("http://localhost:3001/auth/open-url")
+        let mut request = ApiService::post("/auth/open-url")
             .header("Content-Type", "application/json");
 
         if let Some(token) = token {

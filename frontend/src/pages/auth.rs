@@ -5,6 +5,7 @@ use yew::TargetCast;
 use crate::context::auth::use_auth;
 use crate::types::{LoginForm, LoginResponse, RegisterForm, RegisterResponse};
 use crate::pages::forgot_password::ForgotPasswordComponent;
+use crate::services::api_service::ApiService;
 
 #[function_component(LoginComponent)]
 pub fn login_component() -> Html {
@@ -36,7 +37,7 @@ pub fn login_component() -> Html {
                     password: (*password).clone(),
                 };
 
-                let res = Request::post("http://localhost:3001/auth/login")
+                let res = ApiService::post("/auth/login")
                     .header("Content-Type", "application/json")
                     .json(&login_data)
                     .unwrap()
@@ -217,7 +218,7 @@ pub fn register_component() -> Html {
                     password: (*password).clone(),
                 };
 
-                let res = Request::post("http://localhost:3001/auth/register")
+                let res = ApiService::post("/auth/register")
                     .header("Content-Type", "application/json")
                     .json(&register_data)
                     .unwrap()

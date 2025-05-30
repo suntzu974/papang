@@ -1,3 +1,4 @@
+use crate::services::api_service::ApiService;
 use gloo_net::http::Request;
 use serde::Serialize;
 use web_sys::HtmlInputElement;
@@ -74,7 +75,7 @@ pub fn profile() -> Html {
                         name: (*new_name).clone(),
                     };
 
-                    let res = Request::put("http://localhost:3001/auth/me")
+                    let res = ApiService::put("/auth/me")
                         .header("Authorization", &format!("Bearer {}", token))
                         .header("Content-Type", "application/json")
                         .json(&payload)
@@ -90,7 +91,7 @@ pub fn profile() -> Html {
                                     is_editing.set(false);
                                     
                                     // Refresh user data
-                                    let refresh_res = Request::get("http://localhost:3001/auth/me")
+                                    let refresh_res = ApiService::get("/auth/me")
                                         .header("Authorization", &format!("Bearer {}", token))
                                         .send()
                                         .await;
@@ -149,7 +150,7 @@ pub fn profile() -> Html {
                         new_password: (*new_password).clone(),
                     };
 
-                    let res = Request::put("http://localhost:3001/auth/change-password")
+                    let res = ApiService::put("/auth/change-password")
                         .header("Authorization", &format!("Bearer {}", token))
                         .header("Content-Type", "application/json")
                         .json(&payload)
