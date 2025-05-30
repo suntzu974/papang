@@ -5,6 +5,9 @@ CREATE TABLE IF NOT EXISTS users (
 	password_hash TEXT NOT NULL,
 	email_verified BOOLEAN DEFAULT FALSE, -- Add this line
 	verification_token TEXT, -- Add this line
-	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+	password_reset_token TEXT,
+	password_reset_expires_at TIMESTAMP,
+	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

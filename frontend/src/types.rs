@@ -56,3 +56,19 @@ impl PartialEq for Expense {
             && self.expense_date == other.expense_date
     }
 }
+
+#[derive(Serialize)]
+pub struct ChangePasswordForm {
+    pub current_password: String,
+    pub new_password: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct User {
+    pub id: i32,
+    pub name: String,
+    pub email: String,
+    pub email_verified: Option<bool>,
+    pub password_reset_token: Option<String>,
+    pub created_at: String,
+}

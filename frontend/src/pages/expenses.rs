@@ -100,7 +100,7 @@ pub fn expense_component() -> Html {
                         Ok(resp) => {
                             if check_auth_response(resp.status(), &auth) {
                                 if resp.status() == 201 {
-                                    response_message.set("Dépense ajoutée".to_string());
+                                    response_message.set("DÃ©pense ajoutÃ©e".to_string());
                                     // Clear the form
                                     description.set("".to_string());
                                     amount.set("".to_string());
@@ -122,7 +122,7 @@ pub fn expense_component() -> Html {
                                 }
                             }
                         }
-                        Err(_) => response_message.set("Erreur réseau".to_string()),
+                        Err(_) => response_message.set("Erreur rÃ©seau".to_string()),
                     }
                 }
             });
@@ -149,7 +149,7 @@ pub fn expense_component() -> Html {
                         Ok(resp) => {
                             if check_auth_response(resp.status(), &auth) {
                                 if resp.status() == 204 {
-                                    response_message.set("Dépense supprimée".to_string());
+                                    response_message.set("Dï¿½pense supprimï¿½e".to_string());
                                     // Refresh list
                                     let res = Request::get("http://localhost:3001/expenses")
                                         .header("Authorization", &format!("Bearer {}", token))
@@ -167,7 +167,7 @@ pub fn expense_component() -> Html {
                                 }
                             }
                         }
-                        Err(_) => response_message.set("Erreur réseau".to_string()),
+                        Err(_) => response_message.set("Erreur rï¿½seau".to_string()),
                     }
                 }
             });

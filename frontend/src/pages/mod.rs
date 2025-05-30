@@ -8,3 +8,6 @@ pub mod login;
 pub mod register;
 pub mod dashboard;
 pub mod profile;
+pub mod expenses;
+pub mod forgot_password;
+pub mod reset_password;

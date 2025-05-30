@@ -4,6 +4,7 @@ use web_sys::HtmlInputElement;
 use yew::TargetCast;
 use crate::context::auth::use_auth;
 use crate::types::{LoginForm, LoginResponse, RegisterForm, RegisterResponse};
+use crate::pages::forgot_password::ForgotPasswordComponent;
 
 #[function_component(LoginComponent)]
 pub fn login_component() -> Html {
@@ -11,6 +12,7 @@ pub fn login_component() -> Html {
     let password = use_state(|| "".to_string());
     let response_message = use_state(|| "".to_string());
     let show_register = use_state(|| false);
+    let show_forgot_password = use_state(|| false);
     let auth_context = use_auth();
 
     let on_submit = {
@@ -63,7 +65,26 @@ pub fn login_component() -> Html {
         })
     };
 
-    if *show_register {
+    if *show_forgot_password {
+        html! {
+            <div class="container mt-5">
+                <div class="row justify-content-center">
+                    <div class="col-md-6">
+                        <ForgotPasswordComponent />
+                        <div class="text-center mt-3">
+                            <button 
+                                class="btn btn-secondary"
+                                onclick={{
+                                    let show_forgot_password = show_forgot_password.clone();
+                                    Callback::from(move |_| show_forgot_password.set(false))
+                                }}
+                            >{ "Retour à la connexion" }</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    } else if *show_register {
         html! {
             <div class="container mt-5">
                 <div class="row justify-content-center">
@@ -119,7 +140,7 @@ pub fn login_component() -> Html {
                                         <button type="submit" class="btn btn-primary">{ "Se connecter" }</button>
                                     </div>
                                 </form>
-                                <div class="d-grid">
+                                <div class="d-grid mb-3">
                                     <button 
                                         class="btn btn-outline-secondary"
                                         onclick={{
@@ -127,6 +148,20 @@ pub fn login_component() -> Html {
                                             Callback::from(move |_| show_register.set(true))
                                         }}
                                     >{ "S'inscrire" }</button>
+                                </div>
+                                <div class="text-center">
+                                    <a href="#" 
+                                       class="text-muted small"
+                                       onclick={{
+                                           let show_forgot_password = show_forgot_password.clone();
+                                           Callback::from(move |e: MouseEvent| {
+                                               e.prevent_default();
+                                               show_forgot_password.set(true);
+                                           })
+                                       }}
+                                    >
+                                        { "Mot de passe oublié ?" }
+                                    </a>
                                 </div>
                                 {
                                     if !(*response_message).is_empty() {

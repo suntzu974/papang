@@ -52,7 +52,6 @@ pub async fn register_handler(
             name: payload.name,
             email: payload.email.clone(), // Clone email for use in email sending
             password_hash,
-            verification_token: verification_token.clone(), // Clone token for use in email sending
         })
         .await?;
 
