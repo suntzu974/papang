@@ -55,6 +55,13 @@ pub async fn register_handler(
         })
         .await?;
 
+
+
+    // Update user with new verification token
+    state
+        .user_repository
+        .set_verification_token(user.id, &verification_token)
+        .await?;        
     // Send verification email
     if let Err(e) = state.email_service
         .send_verification_email(&payload.email, &verification_token)

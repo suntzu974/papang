@@ -52,6 +52,7 @@ impl<C: Config + std::marker::Sync + 'static> Server<C, PgDatabase, RedisClient>
             .context("Failed to start tcp connection")?;
         
         // Check if HTTPS is enabled
+        
         if let (Some(cert_path), Some(key_path)) = (self.config.tls_cert_path(), self.config.tls_key_path()) {
             tracing::info!("Starting HTTPS server on https://{addr}");
             self.run_https(listener, cert_path, key_path).await

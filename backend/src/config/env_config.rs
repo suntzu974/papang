@@ -125,4 +125,5 @@ impl Config for EnvConfig {
         fn backend_url(&self) -> &str {
         &self.backend_url
     }
+
 }
