@@ -23,7 +23,8 @@ impl EmailService {
     }
 
     pub async fn send_verification_email(&self, to_email: &str, verification_token: &str) -> Result<()> {
-        let verification_url = format!("http://localhost:3001/auth/verify-email?token={}", verification_token);
+        let backend_url = std::env::var("BACKEND_URL").unwrap_or_else(|_| "http://localhost:3001".to_string());
+        let verification_url = format!("{}/auth/verify-email?token={}", backend_url, verification_token);
         
         let email = Message::builder()
             .from(self.from_email.parse().unwrap())
@@ -57,7 +58,8 @@ impl EmailService {
         to_email: &str,
         reset_token: &str,
     ) -> Result<(), anyhow::Error> {
-        let reset_url = format!("http://localhost:3001/auth/reset-password?token={}", reset_token);
+        let backend_url = std::env::var("BACKEND_URL").unwrap_or_else(|_| "http://localhost:3001".to_string());
+        let reset_url = format!("{}/auth/reset-password?token={}", backend_url, reset_token);
         
         let subject = "Demande de réinitialisation de mot de passe - Papang";
         let body = format!(

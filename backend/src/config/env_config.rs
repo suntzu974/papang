@@ -17,11 +17,9 @@ pub struct EnvConfig {
     jwt_secret: Cow<'static, str>,
     jwt_expires_in: i64,
     jwt_maxage: i64,
-    email_from: Cow<'static, str>,
-    email_password: Cow<'static, str>,
     smtp_server: Cow<'static, str>,
-    smtp_port: u16,
     frontend_url: Cow<'static, str>,
+    backend_url: Cow<'static, str>,
 }
 
 impl EnvConfig {
@@ -50,14 +48,9 @@ impl EnvConfig {
                 .get("JWT_MAXAGE")?
                 .parse::<i64>()
                 .map_err(ConfigError::InvalidJwtMaxage)?,
-            email_from: provider.get("EMAIL_FROM")?,
-            email_password: provider.get("EMAIL_PASSWORD")?,
             smtp_server: provider.get("SMTP_SERVER")?,
-            smtp_port: provider
-                .get("SMTP_PORT")?
-                .parse::<u16>()
-                .map_err(ConfigError::InvalidSmtpPort)?,
             frontend_url: provider.get("FRONTEND_URL")?,
+            backend_url: provider.get("FRONTEND_URL")?,
 
         })
     }
@@ -120,23 +113,16 @@ impl Config for EnvConfig {
         self.jwt_maxage
     }
     
-    fn email_from(&self) -> &str {
-        &self.email_from
-    }
-    
-    fn email_password(&self) -> &str {
-        &self.email_password
-    }
     
     fn smtp_server(&self) -> &str {
         &self.smtp_server
     }
     
-    fn smtp_port(&self) -> u16 {
-        self.smtp_port
-    }
-    
+   
     fn frontend_url(&self) -> &str {
         &self.frontend_url
+    }
+        fn backend_url(&self) -> &str {
+        &self.backend_url
     }
 }

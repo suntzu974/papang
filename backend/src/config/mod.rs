@@ -15,11 +15,9 @@ pub trait Config {
     fn jwt_secret(&self) -> &str;
     fn jwt_expires_in(&self) -> i64;
     fn jwt_maxage(&self) -> i64;
-    fn email_from(&self) -> &str;
-    fn email_password(&self) -> &str;
     fn smtp_server(&self) -> &str;
-    fn smtp_port(&self) -> u16;
     fn frontend_url(&self) -> &str;
+    fn backend_url(&self) -> &str;
 
     // TLS configuration methods
     fn tls_cert_path(&self) -> Option<&str>;
