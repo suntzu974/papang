@@ -99,3 +99,12 @@ ORDER BY enumsortorder;
 rustup target add wasm32-unknown-unknown
 
 ```
+# Fusionner une branche xxx vers master
+```shell
+git checkout master
+git pull origin master
+git merge feature-xyz
+# Si pas de conflits :
+# => un commit de fusion est automatiquement créé
+git push origin master
+```
