@@ -83,89 +83,105 @@ pub fn add_expense() -> Html {
     };
 
     html! {
-        <div class="container mt-4">
+        <div class="container-fluid">
             <div class="row justify-content-center">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title mb-0">{ "Ajouter une nouvelle dépense" }</h3>
+                <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h4 class="card-title mb-0 text-center">{ "Ajouter une nouvelle dépense" }</h4>
                         </div>
-                        <div class="card-body">
+                        <div class="card-body p-4">
                             <form onsubmit={on_create}>
-                                <div class="mb-3">
-                                    <label class="form-label">{ "Description" }</label>
-                                    <input
-                                        type="text"
-                                        class="form-control"
-                                        placeholder="Description de la dépense"
-                                        value={(*description).clone()}
-                                        required=true
-                                        oninput={{
-                                            let description = description.clone();
-                                            Callback::from(move |e: InputEvent| {
-                                                let input: HtmlInputElement = e.target_unchecked_into();
-                                                description.set(input.value());
-                                            })
-                                        }}
-                                    />
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold">{ "Description" }</label>
+                                            <input
+                                                type="text"
+                                                class="form-control form-control-lg"
+                                                placeholder="Description de la dépense"
+                                                value={(*description).clone()}
+                                                required=true
+                                                oninput={{
+                                                    let description = description.clone();
+                                                    Callback::from(move |e: InputEvent| {
+                                                        let input: HtmlInputElement = e.target_unchecked_into();
+                                                        description.set(input.value());
+                                                    })
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="mb-3">
-                                    <label class="form-label">{ "Montant (€)" }</label>
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        class="form-control"
-                                        placeholder="0.00"
-                                        value={(*amount).clone()}
-                                        required=true
-                                        oninput={{
-                                            let amount = amount.clone();
-                                            Callback::from(move |e: InputEvent| {
-                                                let input: HtmlInputElement = e.target_unchecked_into();
-                                                amount.set(input.value());
-                                            })
-                                        }}
-                                    />
+                                
+                                <div class="row">
+                                    <div class="col-12 col-sm-6">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold">{ "Montant (€)" }</label>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                class="form-control form-control-lg"
+                                                placeholder="0.00"
+                                                value={(*amount).clone()}
+                                                required=true
+                                                oninput={{
+                                                    let amount = amount.clone();
+                                                    Callback::from(move |e: InputEvent| {
+                                                        let input: HtmlInputElement = e.target_unchecked_into();
+                                                        amount.set(input.value());
+                                                    })
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-sm-6">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold">{ "Catégorie" }</label>
+                                            <select
+                                                class="form-select form-select-lg"
+                                                value={format!("{:?}", *category)}
+                                                onchange={{
+                                                    let category = category.clone();
+                                                    Callback::from(move |e: Event| {
+                                                        let input: HtmlInputElement = e.target_unchecked_into();
+                                                        let value = input.value();
+                                                        let cat = match value.as_str() {
+                                                            "Groceries" => ExpenseCategory::Groceries,
+                                                            "Leisure" => ExpenseCategory::Leisure,
+                                                            "Electronics" => ExpenseCategory::Electronics,
+                                                            "Utilities" => ExpenseCategory::Utilities,
+                                                            "Clothing" => ExpenseCategory::Clothing,
+                                                            "Health" => ExpenseCategory::Health,
+                                                            _ => ExpenseCategory::Others,
+                                                        };
+                                                        category.set(cat);
+                                                    })
+                                                }}
+                                            >
+                                                <option value="Groceries">{ "Alimentation" }</option>
+                                                <option value="Leisure">{ "Loisirs" }</option>
+                                                <option value="Electronics">{ "Électronique" }</option>
+                                                <option value="Utilities">{ "Factures" }</option>
+                                                <option value="Clothing">{ "Vêtements" }</option>
+                                                <option value="Health">{ "Santé" }</option>
+                                                <option value="Others">{ "Autres" }</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="mb-3">
-                                    <label class="form-label">{ "Catégorie" }</label>
-                                    <select
-                                        class="form-select"
-                                        value={format!("{:?}", *category)}
-                                        onchange={{
-                                            let category = category.clone();
-                                            Callback::from(move |e: Event| {
-                                                let input: HtmlInputElement = e.target_unchecked_into();
-                                                let value = input.value();
-                                                let cat = match value.as_str() {
-                                                    "Groceries" => ExpenseCategory::Groceries,
-                                                    "Leisure" => ExpenseCategory::Leisure,
-                                                    "Electronics" => ExpenseCategory::Electronics,
-                                                    "Utilities" => ExpenseCategory::Utilities,
-                                                    "Clothing" => ExpenseCategory::Clothing,
-                                                    "Health" => ExpenseCategory::Health,
-                                                    _ => ExpenseCategory::Others,
-                                                };
-                                                category.set(cat);
-                                            })
-                                        }}
-                                    >
-                                        <option value="Groceries">{ "Alimentation" }</option>
-                                        <option value="Leisure">{ "Loisirs" }</option>
-                                        <option value="Electronics">{ "Électronique" }</option>
-                                        <option value="Utilities">{ "Factures" }</option>
-                                        <option value="Clothing">{ "Vêtements" }</option>
-                                        <option value="Health">{ "Santé" }</option>
-                                        <option value="Others">{ "Autres" }</option>
-                                    </select>
-                                </div>
-                                <div class="d-grid gap-2">
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-plus-circle"></i>{ " Ajouter la dépense" }
-                                    </button>
-                                    <Link<Route> to={Route::ManageExpenses} classes="btn btn-outline-secondary">
-                                        { "Retour à la liste" }
-                                    </Link<Route>>
+                                
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="d-grid gap-3">
+                                            <button type="submit" class="btn btn-primary btn-lg">
+                                                <i class="bi bi-plus-circle me-2"></i>{ "Ajouter la dépense" }
+                                            </button>
+                                            <Link<Route> to={Route::ManageExpenses} classes="btn btn-outline-secondary">
+                                                <i class="bi bi-arrow-left me-2"></i>{ "Retour à la liste" }
+                                            </Link<Route>>
+                                        </div>
+                                    </div>
                                 </div>
                             </form>
                             {

@@ -7,6 +7,7 @@ pub struct User {
     pub id: i32,
     pub name: String,
     pub email: String,
+    pub email_verified: Option<bool>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -16,6 +17,8 @@ pub struct AuthContext {
     pub access_token: Option<String>,
     pub user: Option<User>,
     pub set_user: Callback<Option<User>>,
+    pub logout: Callback<()>,
+    pub handle_session_expired: Callback<()>,
 }
 
 #[derive(Properties, PartialEq)]
@@ -43,14 +46,33 @@ pub fn auth_provider(props: &AuthProviderProps) -> Html {
         })
     };
 
+    let logout = {
+        let token = token.clone();
+        let user = user.clone();
+        Callback::from(move |_| {
+            token.set(None);
+            user.set(None);
+        })
+    };
+
+    let handle_session_expired = {
+        let logout = logout.clone();
+        Callback::from(move |_| {
+            logout.emit(());
+            web_sys::console::log_1(&"Session expired - logged out".into());
+        })
+    };
+
     // Fetch user when token changes
     {
         let user = user.clone();
         let token = (*token).clone();
+        let handle_session_expired = handle_session_expired.clone();
         use_effect_with(token, move |token| {
             if let Some(access_token) = token {
                 let user = user.clone();
                 let access_token = access_token.clone();
+                let handle_session_expired = handle_session_expired.clone();
                 wasm_bindgen_futures::spawn_local(async move {
                     let res = Request::get("http://localhost:3001/auth/me")
                         .header("Authorization", &format!("Bearer {}", access_token))
@@ -62,6 +84,9 @@ pub fn auth_provider(props: &AuthProviderProps) -> Html {
                             if let Ok(user_data) = resp.json::<User>().await {
                                 user.set(Some(user_data));
                             }
+                        } else if resp.status() == 401 {
+                            // Token expired or invalid
+                            handle_session_expired.emit(());
                         }
                     }
                 });
@@ -78,6 +103,8 @@ pub fn auth_provider(props: &AuthProviderProps) -> Html {
         access_token,
         user: (*user).clone(),
         set_user,
+        logout,
+        handle_session_expired,
     };
 
     html! {
@@ -90,4 +117,14 @@ pub fn auth_provider(props: &AuthProviderProps) -> Html {
 #[hook]
 pub fn use_auth() -> AuthContext {
     use_context::<AuthContext>().expect("AuthContext not found")
+}
+
+// Add utility function for handling API responses
+pub fn check_auth_response(status: u16, auth: &AuthContext) -> bool {
+    if status == 401 {
+        auth.handle_session_expired.emit(());
+        false
+    } else {
+        true
+    }
 }

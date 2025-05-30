@@ -32,6 +32,7 @@ pub enum AppError {
 
     #[error(transparent)]
     AxumJsonRejection(#[from] JsonRejection),
+    
 }
 
 impl IntoResponse for AppError {

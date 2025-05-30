@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use yew::prelude::*;
 use gloo_net::http::Request;
-use crate::context::auth::use_auth;
+use crate::context::auth::{use_auth, check_auth_response};
 use crate::types::{Expense, ExpenseCategory};
 use chrono::Datelike;
 
@@ -15,19 +15,21 @@ pub fn expense_dashboard() -> Html {
     {
         let expenses = expenses.clone();
         let access_token = auth.access_token.clone();
+        let auth_for_effect = auth.clone();
         use_effect_with(
             access_token.clone(),
             move |access_token| {
                 if let Some(token) = access_token {
                     let expenses = expenses.clone();
                     let token = token.clone();
+                    let auth = auth_for_effect.clone();
                     wasm_bindgen_futures::spawn_local(async move {
                         let res = Request::get("http://localhost:3001/expenses")
                             .header("Authorization", &format!("Bearer {}", token))
                             .send()
                             .await;
                         if let Ok(resp) = res {
-                            if resp.status() == 200 {
+                            if check_auth_response(resp.status(), &auth) && resp.status() == 200 {
                                 if let Ok(list) = resp.json::<Vec<Expense>>().await {
                                     expenses.set(list);
                                 }
@@ -66,61 +68,63 @@ pub fn expense_dashboard() -> Html {
     };
 
     html! {
-        <div class="container mt-4">
-            <div class="row">
-                <div class="col-12">
-                    <h2 class="mb-4">{ "Tableau de bord des dépenses" }</h2>
-                </div>
-            </div>
-            
+        <div class="container-fluid">
+            <div class="row justify-content-center">
+                <div class="col-12 col-xl-10">
+                    <div class="row">
+                        <div class="col-12">
+                            <h2 class="mb-4 text-center text-md-start">{ "Tableau de bord des dépenses" }</h2>
+                        </div>
+                    </div>
+                    
             // Summary cards
-            <div class="row mb-4">
-                <div class="col-md-3">
-                    <div class="card text-white bg-primary">
-                        <div class="card-body">
-                            <h5 class="card-title">{ "Total des dépenses" }</h5>
-                            <h3>{ format!("{:.2} €", total_amount) }</h3>
+            <div class="row mb-4 g-3">
+                <div class="col-6 col-lg-3">
+                    <div class="card text-white bg-primary h-100">
+                        <div class="card-body text-center">
+                            <h6 class="card-title">{ "Total" }</h6>
+                            <h4 class="mb-0">{ format!("{:.0} €", total_amount) }</h4>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="card text-white bg-success">
-                        <div class="card-body">
-                            <h5 class="card-title">{ "Nombre de dépenses" }</h5>
-                            <h3>{ expenses.len() }</h3>
+                <div class="col-6 col-lg-3">
+                    <div class="card text-white bg-success h-100">
+                        <div class="card-body text-center">
+                            <h6 class="card-title">{ "Nombre" }</h6>
+                            <h4 class="mb-0">{ expenses.len() }</h4>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="card text-white bg-info">
-                        <div class="card-body">
-                            <h5 class="card-title">{ "Dépense moyenne" }</h5>
-                            <h3>{ 
+                <div class="col-6 col-lg-3">
+                    <div class="card text-white bg-info h-100">
+                        <div class="card-body text-center">
+                            <h6 class="card-title">{ "Moyenne" }</h6>
+                            <h4 class="mb-0">{ 
                                 if expenses.is_empty() { 
-                                    "0.00 €".to_string() 
+                                    "0 €".to_string() 
                                 } else { 
-                                    format!("{:.2} €", total_amount / expenses.len() as f64) 
+                                    format!("{:.0} €", total_amount / expenses.len() as f64) 
                                 }
-                            }</h3>
+                            }</h4>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="card text-white bg-warning">
-                        <div class="card-body">
-                            <h5 class="card-title">{ "Catégories" }</h5>
-                            <h3>{ category_totals.len() }</h3>
+                <div class="col-6 col-lg-3">
+                    <div class="card text-white bg-warning h-100">
+                        <div class="card-body text-center">
+                            <h6 class="card-title">{ "Catégories" }</h6>
+                            <h4 class="mb-0">{ category_totals.len() }</h4>
                         </div>
                     </div>
                 </div>
             </div>
 
             // Category breakdown
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>{ "Répartition par catégorie" }</h5>
+            <div class="row g-4">
+                <div class="col-12 col-lg-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h6 class="mb-0">{ "Répartition par catégorie" }</h6>
                         </div>
                         <div class="card-body">
                             {
@@ -160,10 +164,10 @@ pub fn expense_dashboard() -> Html {
                     </div>
                 </div>
                 
-                <div class="col-md-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>{ "Répartition par mois" }</h5>
+                <div class="col-12 col-lg-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0">{ "Répartition par mois" }</h6>
                         </div>
                         <div class="card-body">
                             {
@@ -207,10 +211,11 @@ pub fn expense_dashboard() -> Html {
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5>{ "Dépenses récentes" }</h5>
+                
+                <div class="col-12 col-lg-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">{ "Dépenses récentes" }</h6>
                         </div>
                         <div class="card-body">
                             <div class="list-group list-group-flush" style="max-height: 300px; overflow-y: auto;">
@@ -230,6 +235,8 @@ pub fn expense_dashboard() -> Html {
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
                 </div>
             </div>
         </div>

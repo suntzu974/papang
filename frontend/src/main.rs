@@ -5,7 +5,7 @@ mod components;
 mod pages;
 mod context;
 mod types;
-
+mod services;
 use components::layout::{Header, Footer};
 use pages::{
     main::Main,
@@ -79,7 +79,6 @@ fn app_root() -> Html {
                 <Header />
                 <Navbar />
                     <Switch<Route> render={switch} />
-                <Footer />
             </BrowserRouter>
         </AuthProvider>
     }

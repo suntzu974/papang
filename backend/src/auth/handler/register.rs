@@ -1,16 +1,16 @@
 use std::sync::Arc;
+use uuid::Uuid; // Import Uuid
 
 use axum::{Json, extract::State, http::StatusCode};
 use serde::Deserialize;
 use validator::Validate;
+use serde_json::json; // Import json macro
+use anyhow::anyhow;
 
 use crate::{
     auth::{
         password::PasswordService,
-        token::{
-            response::RefreshTokenResponse,
-            service::{access_token::AccessTokenService, refresh_token::RefreshTokenService},
-        },
+        // Remove token response and services for now, as tokens are not issued on register
     },
     error::AppError,
     state::AppState,
@@ -33,7 +33,7 @@ pub struct RegisterPayload {
 pub async fn register_handler(
     State(state): State<Arc<AppState>>,
     ValidatedJson(payload): ValidatedJson<RegisterPayload>,
-) -> Result<(StatusCode, Json<RefreshTokenResponse>), AppError> {
+) -> Result<(StatusCode, Json<serde_json::Value>), AppError> { // Return a generic JSON value
     if state
         .user_repository
         .exists_by_email(&payload.email)
@@ -43,18 +43,38 @@ pub async fn register_handler(
     }
 
     let password_hash = state.password_service.hash_password(&payload.password)?;
+    
+    let verification_token = Uuid::new_v4().to_string();
+
     let user = state
         .user_repository
         .create(CreateUserPayload {
             name: payload.name,
-            email: payload.email,
+            email: payload.email.clone(), // Clone email for use in email sending
             password_hash,
         })
         .await?;
 
-    let response = RefreshTokenResponse {
-        access_token: state.access_token_service.generate_token(user.id).await?,
-        refresh_token: state.refresh_token_service.generate_token(user.id).await?,
-    };
-    Ok((StatusCode::CREATED, Json(response)))
+
+
+    // Update user with new verification token
+    state
+        .user_repository
+        .set_verification_token(user.id, &verification_token)
+        .await?;        
+    // Send verification email
+    if let Err(e) = state.email_service
+        .send_verification_email(&payload.email, &verification_token)
+        .await
+    {
+        tracing::error!("Failed to send verification email: {}", e);
+
+        return Err(AppError::InternalServerError(
+            anyhow!("Failed to send verification email")
+        ));
+    }
+
+    Ok((StatusCode::CREATED, Json(json!({
+        "message": "Registration successful. Please check your email to verify your account."
+    }))))
 }

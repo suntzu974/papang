@@ -28,7 +28,7 @@ impl AccessTokenServiceImpl {
 #[async_trait]
 impl AccessTokenService for AccessTokenServiceImpl {
     async fn generate_token(&self, user_id: i32) -> anyhow::Result<String> {
-        let duration = Duration::hours(1); // Access tokens usually have a shorter lifespan
+        let duration = Duration::minutes(10); // Access tokens usually have a shorter lifespan
         let claims = Claims::new(user_id, duration)?;
         let token = encode(
             &Header::new(jsonwebtoken::Algorithm::HS256),

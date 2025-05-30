@@ -24,8 +24,7 @@ pub struct RegisterForm {
 
 #[derive(Deserialize, Debug)]
 pub struct RegisterResponse {
-    pub access_token: String,
-    pub refresh_token: String,
+    pub message: String,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -56,4 +55,20 @@ impl PartialEq for Expense {
             && self.description == other.description
             && self.expense_date == other.expense_date
     }
+}
+
+#[derive(Serialize)]
+pub struct ChangePasswordForm {
+    pub current_password: String,
+    pub new_password: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct User {
+    pub id: i32,
+    pub name: String,
+    pub email: String,
+    pub email_verified: Option<bool>,
+    pub password_reset_token: Option<String>,
+    pub created_at: String,
 }

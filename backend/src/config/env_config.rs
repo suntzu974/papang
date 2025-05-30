@@ -8,7 +8,18 @@ pub struct EnvConfig {
     access_secret: Cow<'static, str>,
     refresh_secret: Cow<'static, str>,
     redis_url: Cow<'static, str>,
+    smtp_username: Cow<'static, str>,
+    smtp_password: Cow<'static, str>,
+    from_email: Cow<'static, str>,
     port: u16,
+    tls_cert_path: Option<Cow<'static, str>>,
+    tls_key_path: Option<Cow<'static, str>>,
+    jwt_secret: Cow<'static, str>,
+    jwt_expires_in: i64,
+    jwt_maxage: i64,
+    smtp_server: Cow<'static, str>,
+    frontend_url: Cow<'static, str>,
+    backend_url: Cow<'static, str>,
 }
 
 impl EnvConfig {
@@ -19,10 +30,28 @@ impl EnvConfig {
             access_secret: provider.get("ACCESS_SECRET")?,
             refresh_secret: provider.get("REFRESH_SECRET")?,
             redis_url: provider.get("REDIS_URL")?,
+            smtp_username: provider.get("SMTP_USERNAME")?,
+            smtp_password: provider.get("SMTP_PASSWORD")?,
+            from_email: provider.get("FROM_EMAIL")?,
             port: provider
                 .get("PORT")?
                 .parse::<u16>()
                 .map_err(ConfigError::InvalidPort)?,
+            tls_cert_path: provider.get("TLS_CERT_PATH").ok(),
+            tls_key_path: provider.get("TLS_KEY_PATH").ok(),
+            jwt_secret: provider.get("JWT_SECRET")?,
+            jwt_expires_in: provider
+                .get("JWT_EXPIRES_IN")?
+                .parse::<i64>()
+                .map_err(ConfigError::InvalidJwtExpiresIn)?,
+            jwt_maxage: provider
+                .get("JWT_MAXAGE")?
+                .parse::<i64>()
+                .map_err(ConfigError::InvalidJwtMaxage)?,
+            smtp_server: provider.get("SMTP_SERVER")?,
+            frontend_url: provider.get("FRONTEND_URL")?,
+            backend_url: provider.get("FRONTEND_URL")?,
+
         })
     }
 }
@@ -51,4 +80,50 @@ impl Config for EnvConfig {
     fn port(&self) -> u16 {
         self.port
     }
+
+    fn smtp_username(&self) -> &str {
+        &self.smtp_username
+    }
+
+    fn smtp_password(&self) -> &str {
+        &self.smtp_password
+    }
+
+    fn from_email(&self) -> &str {
+        &self.from_email
+    }
+
+    fn tls_cert_path(&self) -> Option<&str> {
+        self.tls_cert_path.as_deref()
+    }
+
+    fn tls_key_path(&self) -> Option<&str> {
+        self.tls_key_path.as_deref()
+    }
+    
+    fn jwt_secret(&self) -> &str {
+        &self.jwt_secret
+    }
+    
+    fn jwt_expires_in(&self) -> i64 {
+        self.jwt_expires_in
+    }
+    
+    fn jwt_maxage(&self) -> i64 {
+        self.jwt_maxage
+    }
+    
+    
+    fn smtp_server(&self) -> &str {
+        &self.smtp_server
+    }
+    
+   
+    fn frontend_url(&self) -> &str {
+        &self.frontend_url
+    }
+        fn backend_url(&self) -> &str {
+        &self.backend_url
+    }
+
 }
