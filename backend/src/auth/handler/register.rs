@@ -63,14 +63,12 @@ pub async fn register_handler(
     {
         tracing::error!("Failed to send verification email: {}", e);
 
-return Err(AppError::InternalServerError(
-    anyhow!("Failed to send verification email")
-));
-
+        return Err(AppError::InternalServerError(
+            anyhow!("Failed to send verification email")
+        ));
     }
 
     Ok((StatusCode::CREATED, Json(json!({
-        "message": "Registration successful. Please check your email to verify your account.",
-        "userId": user.id
+        "message": "Registration successful. Please check your email to verify your account."
     }))))
 }

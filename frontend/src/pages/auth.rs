@@ -155,6 +155,7 @@ pub fn register_component() -> Html {
     let password = use_state(|| "".to_string());
     let response_message = use_state(|| "".to_string());
     let access_token = use_state(|| None::<String>);
+    let email_verified = use_state(|| false);
     let auth_context = use_auth();
 
     let on_submit = {
@@ -193,9 +194,7 @@ pub fn register_component() -> Html {
                         if resp.status() == 201 {
                             match resp.json::<RegisterResponse>().await {
                                 Ok(json) => {
-                                    access_token.set(Some(json.access_token.clone()));
-                                    set_token.emit(Some(json.access_token.clone()));
-                                    response_message.set("Inscription réussie".to_string());
+                                    response_message.set(json.message.to_string());
                                 }
                                 Err(_) => {
                                     response_message.set("Erreur lors de la récupération du token".to_string());

@@ -76,6 +76,20 @@ pub fn profile() -> Html {
                                 if resp.status() == 200 {
                                     response_message.set("Nom mis à jour !".to_string());
                                     is_editing.set(false);
+                                    
+                                    // Refresh user data
+                                    let refresh_res = Request::get("http://localhost:3001/auth/me")
+                                        .header("Authorization", &format!("Bearer {}", token))
+                                        .send()
+                                        .await;
+                                    
+                                    if let Ok(refresh_resp) = refresh_res {
+                                        if refresh_resp.status() == 200 {
+                                            if let Ok(updated_user) = refresh_resp.json().await {
+                                                auth.set_user.emit(Some(updated_user));
+                                            }
+                                        }
+                                    }
                                 } else {
                                     response_message.set("Erreur lors de la mise à jour".to_string());
                                 }

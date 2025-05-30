@@ -24,8 +24,7 @@ pub struct RegisterForm {
 
 #[derive(Deserialize, Debug)]
 pub struct RegisterResponse {
-    pub access_token: String,
-    pub refresh_token: String,
+    pub message: String,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]

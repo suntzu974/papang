@@ -23,7 +23,7 @@ impl EmailService {
     }
 
     pub async fn send_verification_email(&self, to_email: &str, verification_token: &str) -> Result<()> {
-        let verification_url = format!("http://localhost:3001/verify-email?token={}", verification_token);
+        let verification_url = format!("http://localhost:3001/auth/verify-email?token={}", verification_token);
         
         let email = Message::builder()
             .from(self.from_email.parse().unwrap())

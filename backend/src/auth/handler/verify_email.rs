@@ -8,10 +8,6 @@ use axum::{
 use serde::Deserialize;
 
 use crate::{
-    auth::token::{
-        response::RefreshTokenResponse,
-        service::{access_token::AccessTokenService, refresh_token::RefreshTokenService},
-    },
     error::AppError,
     state::AppState,
     user::repository::UserRepository,
@@ -25,7 +21,7 @@ pub struct VerifyEmailQuery {
 pub async fn verify_email_handler(
     State(state): State<Arc<AppState>>,
     Query(query): Query<VerifyEmailQuery>,
-) -> Result<(StatusCode, Json<RefreshTokenResponse>), AppError> {
+) -> Result<(StatusCode, Json<serde_json::Value>), AppError> {
     let user = state
         .user_repository
         .verify_email_token(&query.token)
@@ -34,10 +30,9 @@ pub async fn verify_email_handler(
 
     state.user_repository.mark_email_verified(user.id).await?;
 
-    let response = RefreshTokenResponse {
-        access_token: state.access_token_service.generate_token(user.id).await?,
-        refresh_token: state.refresh_token_service.generate_token(user.id).await?,
-    };
+    let response = serde_json::json!({
+        "message": "Email verified successfully"
+    });
 
     Ok((StatusCode::OK, Json(response)))
 }
